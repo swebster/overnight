@@ -1,0 +1,4 @@
+
+# the default (annotated) style requires a lot of redundant repetition
+Style/FormatStringToken:
+  EnforcedStyle: unannotated
