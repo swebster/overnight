@@ -14,10 +14,10 @@ Gem::Specification.new do |s|
 
   s.required_ruby_version = '>= 3.3.0'
 
+  s.add_dependency 'dotenv', '~> 3.1'
   s.add_dependency 'dry-validation', '~> 1.10'
   s.add_dependency 'typhoeus', '~> 1.4'
 
-  s.add_development_dependency 'dotenv', '~> 3.1'
   s.add_development_dependency 'rubocop', '~> 1.64'
   s.add_development_dependency 'ruby-lsp', '~> 0.16'
 end
