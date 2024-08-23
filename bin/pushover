@@ -2,6 +2,6 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require 'overnight/nightscout'
+require 'overnight/pushover'
 
-puts Overnight::Nightscout.entries
+Overnight::Pushover.post('Initial test')
