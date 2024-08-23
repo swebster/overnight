@@ -8,7 +8,7 @@ module Overnight
   module Nightscout
     # the status of the devices uploading data to Nightscout, such as Loop or OpenAPS
     class DeviceStatus
-      attr_reader :entries
+      attr_reader :timestamp, :predicted
 
       def self.request(limit: 1)
         Client.request('devicestatus', params: { count: limit })
@@ -19,10 +19,11 @@ module Overnight
       end
 
       def initialize(loop:)
+        @timestamp = loop[:timestamp]
         predicted = loop[:predicted]
         start_date = predicted[:startDate]
 
-        @entries = predicted[:values].each_with_index.map do |glucose, index|
+        @predicted = predicted[:values].each_with_index.map do |glucose, index|
           time = start_date + (300 * index)
           Entry.new(dateString: time, type: 'sgv', sgv: glucose)
         end.drop(1) # the first 'prediction' is actually the most recent reading

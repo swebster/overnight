@@ -7,19 +7,18 @@ require 'overnight/nightscout/device_status'
 module Overnight
   # provides a wrapper around the Nightscout API
   module Nightscout
-    def self.entries(limit: 12)
+    def self.get(limit: 12)
       hydra = Typhoeus::Hydra.new
-      request_entry = Entry.request(limit: limit)
+      request_entry = Entry.request(limit:)
       request_status = DeviceStatus.request
 
       hydra.queue(request_entry)
       hydra.queue(request_status)
       hydra.run
 
-      latest_entries = Entry.parse(request_entry.response)
+      entries = Entry.parse(request_entry.response)
       loop = DeviceStatus.parse(request_status.response).first
-
-      latest_entries.reverse + loop.entries
+      { entries:, loop: }
     end
   end
 end

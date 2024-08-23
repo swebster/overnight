@@ -4,4 +4,9 @@
 require 'bundler/setup'
 require 'overnight/nightscout'
 
-puts Overnight::Nightscout.entries
+nightscout = Overnight::Nightscout.get
+entries, loop = nightscout.fetch_values(:entries, :loop)
+
+puts entries.reverse
+puts format('%s: Loop predicts:', loop.timestamp.localtime)
+puts loop.predicted
