@@ -10,8 +10,8 @@ module Overnight
     class DeviceStatus
       attr_reader :timestamp, :predicted
 
-      def self.request(limit: 1)
-        Client.request('devicestatus', params: { count: limit })
+      def self.request(count: 1)
+        Client.request('devicestatus', params: { count: })
       end
 
       def self.parse(response)
