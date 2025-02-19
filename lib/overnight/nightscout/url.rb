@@ -8,7 +8,7 @@ module Overnight
     # methods to generate Nightscout URLs
     module Url
       def self.base
-        URI::HTTPS.build({ host: Nightscout::HOST, path: '/api/' })
+        URI::HTTPS.build({ host: Nightscout::HOST, port: Nightscout::PORT, path: '/api/' })
       end
 
       def self.join(path_segment, api_version)

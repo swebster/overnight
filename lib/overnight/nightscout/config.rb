@@ -7,6 +7,7 @@ Dotenv.require_keys('NIGHTSCOUT_HOST', 'NIGHTSCOUT_USER')
 module Overnight
   module Nightscout
     HOST = ENV['NIGHTSCOUT_HOST']
+    PORT = ENV['NIGHTSCOUT_PORT']
     USER = ENV['NIGHTSCOUT_USER']
   end
 end
