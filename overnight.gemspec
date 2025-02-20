@@ -18,6 +18,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'dry-validation', '~> 1.11'
   s.add_dependency 'typhoeus', '~> 1.4'
 
+  s.add_development_dependency 'minitest', '~> 5.25'
   s.add_development_dependency 'rubocop', '~> 1.72'
   s.add_development_dependency 'ruby-lsp', '~> 0.23'
 end
