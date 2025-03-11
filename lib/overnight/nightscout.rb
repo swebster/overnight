@@ -9,10 +9,13 @@ module Overnight
   # provides a wrapper around the Nightscout API
   module Nightscout
     def self.get(entry_params: {}, device_params: {})
+      request_auth = Authorization.request
+      auth = Authorization.parse(request_auth.run)
+
       hydra = Typhoeus::Hydra.new
-      request_entry = Entry.request(**entry_params.compact)
-      request_device = DeviceStatus.request(**device_params.compact)
-      request_status = Status.request
+      request_entry = Entry.request(token: auth.token, **entry_params.compact)
+      request_device = DeviceStatus.request(token: auth.token, **device_params.compact)
+      request_status = Status.request(token: auth.token)
 
       hydra.queue(request_entry)
       hydra.queue(request_device)

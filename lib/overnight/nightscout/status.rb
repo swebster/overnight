@@ -9,8 +9,8 @@ module Overnight
     class Status
       attr_reader :status, :time
 
-      def self.request
-        Client.request('status')
+      def self.request(token:)
+        Client.request('status', token:)
       end
 
       def self.parse(response)

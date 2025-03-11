@@ -9,8 +9,8 @@ module Overnight
     class Entry
       attr_reader :time
 
-      def self.request(count: 12)
-        Client.request('entries', params: { count: })
+      def self.request(token:, count: 12)
+        Client.request('entries', token:, params: { count: })
       end
 
       def self.parse(response)

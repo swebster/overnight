@@ -9,9 +9,10 @@ module Overnight
   module Nightscout
     # generic wrapper for all Nightscout API requests and responses
     module Client
-      def self.request(path_segment, api_version = 'v1', **options)
+      def self.request(path_segment, api_version = 'v1', token: nil, **options)
         url = Url.join(path_segment, api_version)
-        options[:headers] = { accept: 'application/json' }.merge(options[:headers] || {})
+        options[:headers] = { Accept: 'application/json' }.merge(options[:headers] || {})
+        options[:headers].merge!({ Authorization: "Bearer #{token.jwt}" }) if token
 
         Typhoeus::Request.new(url, options).tap do |request|
           request.on_complete { validate_http(_1) }
