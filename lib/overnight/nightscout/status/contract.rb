@@ -7,7 +7,7 @@ module Overnight
     class Status
       # validates Nightscout API responses to status requests
       class Contract < Dry::Validation::Contract
-        params do
+        json do
           required(:status).value(:string)
           required(:serverTime).value(:time)
           required(:settings).hash(:filled?) do

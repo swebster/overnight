@@ -7,7 +7,7 @@ module Overnight
     class DeviceStatus
       # validates Nightscout API responses to devicestatus requests
       class Contract < Dry::Validation::Contract
-        params do
+        json do
           required(:loop).hash(:filled?) do
             required(:timestamp).filled(:time)
             required(:predicted).hash(:filled?) do

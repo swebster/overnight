@@ -15,7 +15,7 @@ module Overnight
           end
         end
 
-        params do
+        json do
           required(:dateString).value(:time)
           required(:type).value(included_in?: %w[mbg sgv])
           optional(:mbg).value(:integer, gt?: 0)
