@@ -4,12 +4,14 @@ PATH
     overnight (0.1.0)
       dotenv (~> 3.1)
       dry-validation (~> 1.11)
+      jwt (~> 2.10)
       typhoeus (~> 1.4)
 
 GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
+    base64 (0.2.0)
     bigdecimal (3.1.9)
     concurrent-ruby (1.3.5)
     dotenv (3.1.7)
@@ -53,6 +55,8 @@ GEM
     ffi (1.17.1)
     ffi (1.17.1-x86_64-linux-gnu)
     json (2.10.1)
+    jwt (2.10.1)
+      base64
     language_server-protocol (3.17.0.4)
     lint_roller (1.1.0)
     logger (1.6.6)
