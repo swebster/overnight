@@ -4,7 +4,7 @@ require 'uri'
 require 'overnight/nightscout/config'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # methods to generate Nightscout URLs
     module Url
       def self.base

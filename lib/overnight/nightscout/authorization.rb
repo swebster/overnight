@@ -6,7 +6,7 @@ require 'overnight/nightscout/client'
 require 'overnight/nightscout/config'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # generates a temporary bearer JWT for authentication of subsequent requests
     class Authorization
       attr_reader :token, :subject, :permissions, :issued, :expires

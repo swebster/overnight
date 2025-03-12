@@ -11,7 +11,7 @@ module Types # rubocop:disable Style/Documentation
 end
 
 module Overnight
-  module Nightscout
+  class Nightscout
     class Authorization
       # validates Nightscout API responses to authorization requests
       class Contract < Dry::Validation::Contract

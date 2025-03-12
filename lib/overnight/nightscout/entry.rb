@@ -4,7 +4,7 @@ require 'overnight/nightscout/client'
 require 'overnight/nightscout/entry/contract'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # blood glucose readings, either from a CGM (type: "sgv") or manual (type: "mbg")
     class Entry
       attr_reader :time

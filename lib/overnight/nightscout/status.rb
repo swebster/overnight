@@ -4,7 +4,7 @@ require 'overnight/nightscout/client'
 require 'overnight/nightscout/status/contract'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # the status of Nightscout itself, including configured alarm thresholds
     class Status
       attr_reader :status, :time

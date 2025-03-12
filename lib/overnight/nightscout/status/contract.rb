@@ -3,7 +3,7 @@
 require 'dry-validation'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     class Status
       # validates Nightscout API responses to status requests
       class Contract < Dry::Validation::Contract

@@ -7,7 +7,7 @@ require 'overnight/nightscout/status'
 
 module Overnight
   # provides a wrapper around the Nightscout API
-  module Nightscout
+  class Nightscout
     def self.get(entry_params: {}, device_params: {})
       request_auth = Authorization.request
       auth = Authorization.parse(request_auth.run)

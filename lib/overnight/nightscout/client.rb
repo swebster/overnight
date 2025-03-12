@@ -6,7 +6,7 @@ require 'overnight/nightscout/error'
 require 'overnight/nightscout/url'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # generic wrapper for all Nightscout API requests and responses
     module Client
       def self.request(path_segment, api_version = 'v1', token: nil, **options)

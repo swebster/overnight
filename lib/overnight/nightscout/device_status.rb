@@ -5,7 +5,7 @@ require 'overnight/nightscout/device_status/contract'
 require 'overnight/nightscout/entry'
 
 module Overnight
-  module Nightscout
+  class Nightscout
     # the status of the devices uploading data to Nightscout, such as Loop or OpenAPS
     class DeviceStatus
       attr_reader :timestamp, :predicted
