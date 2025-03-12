@@ -8,15 +8,19 @@ require 'overnight/nightscout/status'
 module Overnight
   # provides a wrapper around the Nightscout API
   class Nightscout
-    def get(entry_params: {}, device_params: {})
-      request_authorization if token_expiring?
-      create_requests(entry_params:, device_params:)
-      request_data
-      parse_responses
+    def initialize(entry_params: {}, device_params: {})
+      @hydra = Typhoeus::Hydra.new
+      @entry_params = entry_params.compact
+      @device_params = device_params.compact
     end
 
-    def initialize
-      @hydra = Typhoeus::Hydra.new
+    def get
+      if token_expiring?
+        request_authorization
+        create_requests
+      end
+      request_data
+      parse_responses
     end
 
     private
@@ -30,11 +34,11 @@ module Overnight
       @auth = Authorization.parse(request_auth.run)
     end
 
-    def create_requests(entry_params: {}, device_params: {})
+    def create_requests
       @requests = {}
       token = @auth.token
-      @requests[Entry] = Entry.request(token:, **entry_params.compact)
-      @requests[DeviceStatus] = DeviceStatus.request(token:, **device_params.compact)
+      @requests[Entry] = Entry.request(token:, **@entry_params)
+      @requests[DeviceStatus] = DeviceStatus.request(token:, **@device_params)
       @requests[Status] = Status.request(token:)
     end
 

@@ -4,11 +4,11 @@
 require 'bundler/setup'
 require 'overnight/nightscout'
 
-nightscout = Overnight::Nightscout.new.get
-entries, devices, status = nightscout.fetch_values(:entry, :device_status, :status)
-loop = devices.first
+nightscout = Overnight::Nightscout.new
+data = nightscout.get
+loop = data[:device_status].first
 
-puts status
-puts entries.reverse
+puts data[:status]
+puts data[:entry].reverse
 puts format('%s: Loop predicts:', loop.timestamp.localtime)
 puts loop.predicted
