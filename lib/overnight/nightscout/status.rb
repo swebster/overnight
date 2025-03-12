@@ -20,7 +20,7 @@ module Overnight
       def initialize(status:, serverTime:, settings:)
         @status = status
         @time = serverTime
-        @thresholds = settings[:thresholds]
+        @thresholds = settings[:thresholds].transform_keys(&:to_sym)
       end
 
       def thresholds

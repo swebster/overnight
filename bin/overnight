@@ -5,10 +5,21 @@ require 'bundler/setup'
 require 'overnight/nightscout'
 
 nightscout = Overnight::Nightscout.new
-data = nightscout.get
-loop = data[:device_status].first
 
-puts data[:status]
-puts data[:entry].reverse
-puts format('%s: Loop predicts:', loop.timestamp.localtime)
-puts loop.predicted
+Signal.trap('INT') do
+  puts
+  exit 130
+end
+
+loop do
+  data = nightscout.get
+  current = data[:entry].first
+  loop = data[:device_status].first
+
+  min_max = loop.predicted.first(12).minmax
+  s = format('%s: ', current.time.localtime.strftime('%F %T'))
+  puts s << [current, *min_max].map { |m| format('%4.1f', m.glucose) }.join(', ')
+
+  # TODO: replace with a proper timer to prevent drift
+  sleep(60 * 5)
+end

@@ -26,6 +26,10 @@ module Overnight
         @glucose / 18.0
       end
 
+      def <=>(other)
+        @glucose <=> other.instance_variable_get(:@glucose)
+      end
+
       def to_s
         format('%s: %4.1f', time.localtime, glucose)
       end
