@@ -27,6 +27,10 @@ module Overnight
         @issued = iat
         @expires = exp
       end
+
+      def expired_after?(seconds:)
+        @expires < Time.now + seconds
+      end
     end
   end
 end

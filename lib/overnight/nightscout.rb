@@ -8,24 +8,49 @@ require 'overnight/nightscout/status'
 module Overnight
   # provides a wrapper around the Nightscout API
   class Nightscout
-    def self.get(entry_params: {}, device_params: {})
+    def get(entry_params: {}, device_params: {})
+      request_authorization if token_expiring?
+      create_requests(entry_params:, device_params:)
+      request_data
+      parse_responses
+    end
+
+    def initialize
+      @hydra = Typhoeus::Hydra.new
+    end
+
+    private
+
+    def token_expiring?
+      @auth.nil? || @auth.expired_after?(seconds: 300)
+    end
+
+    def request_authorization
       request_auth = Authorization.request
-      auth = Authorization.parse(request_auth.run)
+      @auth = Authorization.parse(request_auth.run)
+    end
 
-      hydra = Typhoeus::Hydra.new
-      request_entry = Entry.request(token: auth.token, **entry_params.compact)
-      request_device = DeviceStatus.request(token: auth.token, **device_params.compact)
-      request_status = Status.request(token: auth.token)
+    def create_requests(entry_params: {}, device_params: {})
+      @requests = {}
+      token = @auth.token
+      @requests[Entry] = Entry.request(token:, **entry_params.compact)
+      @requests[DeviceStatus] = DeviceStatus.request(token:, **device_params.compact)
+      @requests[Status] = Status.request(token:)
+    end
 
-      hydra.queue(request_entry)
-      hydra.queue(request_device)
-      hydra.queue(request_status)
-      hydra.run
+    def request_data
+      @requests.each_value { |request| @hydra.queue(request) }
+      @hydra.run
+    end
 
-      entries = Entry.parse(request_entry.response)
-      devices = DeviceStatus.parse(request_device.response)
-      status = Status.parse(request_status.response)
-      { entries:, devices:, status: }
+    def parse_responses
+      @requests.map do |type, request|
+        [snake_sym(type.name.split('::').last), type.parse(request.response)]
+      end.to_h
+    end
+
+    def snake_sym(subtype)
+      subtype.gsub(/(?<=[a-z])(?=[A-Z])/, '_').downcase.to_sym
     end
   end
 end

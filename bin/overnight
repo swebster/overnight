@@ -4,8 +4,8 @@
 require 'bundler/setup'
 require 'overnight/nightscout'
 
-nightscout = Overnight::Nightscout.get
-entries, devices, status = nightscout.fetch_values(:entries, :devices, :status)
+nightscout = Overnight::Nightscout.new.get
+entries, devices, status = nightscout.fetch_values(:entry, :device_status, :status)
 loop = devices.first
 
 puts status
