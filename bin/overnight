@@ -3,23 +3,29 @@
 
 require 'bundler/setup'
 require 'overnight/nightscout'
+require 'rufus-scheduler'
 
 nightscout = Overnight::Nightscout.new
+scheduler = Rufus::Scheduler.new
+columns = %w[LocalDate Time NsTime BgTime BG Min Max]
+puts format('%-10 8 8 8 4 4 4s'.gsub(' ', 's %-'), *columns)
 
 Signal.trap('INT') do
   puts
   exit 130
 end
 
-loop do
+scheduler.every '5m', first: :now do
+  time_started = Time.now
   data = nightscout.get
   current = data[:entry].first
   loop = data[:device_status].first
+  status = data[:status]
 
   min_max = loop.predicted.first(12).minmax
-  s = format('%s: ', current.time.localtime.strftime('%F %T'))
-  puts s << [current, *min_max].map { |m| format('%4.1f', m.glucose) }.join(', ')
-
-  # TODO: replace with a proper timer to prevent drift
-  sleep(60 * 5)
+  s = time_started.localtime.strftime('%F %T ')
+  s << [status, current].map { |x| x.time.localtime.strftime('%T ') }.join
+  puts s << [current, *min_max].map { |m| format('%4.1f', m.glucose) }.join(' ')
 end
+
+scheduler.join
