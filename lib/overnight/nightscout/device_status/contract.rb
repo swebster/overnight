@@ -14,6 +14,14 @@ module Overnight
               required(:startDate).filled(:time)
               required(:values).array(:filled?) { int? | float? }
             end
+            required(:cob).hash(:filled?) do
+              required(:timestamp).filled(:time)
+              required(:cob).value(:float?, gteq?: 0.0)
+            end
+            required(:iob).hash(:filled?) do
+              required(:timestamp).filled(:time)
+              required(:iob).value(:float)
+            end
           end
         end
       end

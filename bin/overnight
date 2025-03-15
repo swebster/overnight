@@ -7,8 +7,8 @@ require 'rufus-scheduler'
 
 nightscout = Overnight::Nightscout.new
 scheduler = Rufus::Scheduler.new
-columns = %w[LocalDate Time NsTime BgTime BG Min Max]
-puts format('%-10 8 8 8 4 4 4s'.gsub(' ', 's %-'), *columns)
+columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
+puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
 
 Signal.trap('INT') do
   puts
@@ -25,7 +25,8 @@ scheduler.every '5m', first: :now do
   min_max = loop.predicted.first(12).minmax
   s = time_started.localtime.strftime('%F %T ')
   s << [status, current].map { |x| x.time.localtime.strftime('%T ') }.join
-  puts s << [current, *min_max].map { |m| status.format(m.glucose) }.join(' ')
+  s << [current, *min_max].map { |y| status.format(y.glucose) }.join(' ')
+  puts s << format(' %5.2f %4.1f', loop.iob, loop.cob)
 end
 
 scheduler.join
