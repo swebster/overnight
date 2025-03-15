@@ -7,7 +7,7 @@ module Overnight
   class Nightscout
     # blood glucose readings, either from a CGM (type: "sgv") or manual (type: "mbg")
     class Entry
-      attr_reader :time
+      attr_reader :time, :glucose
 
       def self.request(token:, count: 12)
         Client.request('entries', token:, params: { count: })
@@ -22,16 +22,8 @@ module Overnight
         @glucose = type == 'sgv' ? sgv : mbg
       end
 
-      def glucose
-        @glucose / 18.0
-      end
-
       def <=>(other)
-        @glucose <=> other.instance_variable_get(:@glucose)
-      end
-
-      def to_s
-        format('%s: %4.1f', time.localtime, glucose)
+        @glucose <=> other.glucose
       end
     end
   end

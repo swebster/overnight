@@ -2,6 +2,7 @@
 
 require 'overnight/nightscout/client'
 require 'overnight/nightscout/status/contract'
+require 'overnight/nightscout/status/glucose_ranges'
 
 module Overnight
   class Nightscout
@@ -20,16 +21,12 @@ module Overnight
       def initialize(status:, serverTime:, settings:)
         @status = status
         @time = serverTime
-        @thresholds = settings[:thresholds].transform_keys(&:to_sym)
+        @glucose_ranges = GlucoseRanges.new(settings[:thresholds])
       end
 
-      def thresholds
-        @thresholds.transform_values { _1 / 18.0 }
-      end
-
-      def to_s
-        s = format('%s: Status: %s, ', time.localtime, status)
-        s << thresholds.map { |k, v| format('%s: %.1f', k, v) }.join(', ')
+      def format(glucose)
+        colour = @glucose_ranges.find(glucose).colour
+        colour.call(Kernel.format('%4.1f', glucose / 18.0))
       end
     end
   end

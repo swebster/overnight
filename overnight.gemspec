@@ -17,6 +17,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'dotenv', '~> 3.1'
   s.add_dependency 'dry-validation', '~> 1.11'
   s.add_dependency 'jwt', '~> 2.10'
+  s.add_dependency 'rainbow', '~> 3.1'
   s.add_dependency 'rufus-scheduler', '~> 3.9'
   s.add_dependency 'typhoeus', '~> 1.4'
 

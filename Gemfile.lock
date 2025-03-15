@@ -5,6 +5,7 @@ PATH
       dotenv (~> 3.1)
       dry-validation (~> 1.11)
       jwt (~> 2.10)
+      rainbow (~> 3.1)
       rufus-scheduler (~> 3.9)
       typhoeus (~> 1.4)
 

@@ -25,7 +25,7 @@ scheduler.every '5m', first: :now do
   min_max = loop.predicted.first(12).minmax
   s = time_started.localtime.strftime('%F %T ')
   s << [status, current].map { |x| x.time.localtime.strftime('%T ') }.join
-  puts s << [current, *min_max].map { |m| format('%4.1f', m.glucose) }.join(' ')
+  puts s << [current, *min_max].map { |m| status.format(m.glucose) }.join(' ')
 end
 
 scheduler.join
