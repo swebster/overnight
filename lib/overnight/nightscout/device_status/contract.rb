@@ -16,11 +16,11 @@ module Overnight
             end
             required(:cob).hash(:filled?) do
               required(:timestamp).filled(:time)
-              required(:cob).value(:float?, gteq?: 0.0)
+              required(:cob).filled { (int? | float?) & gteq?(0) }
             end
             required(:iob).hash(:filled?) do
               required(:timestamp).filled(:time)
-              required(:iob).value(:float)
+              required(:iob).filled { int? | float? }
             end
           end
         end

@@ -16,10 +16,10 @@ module Overnight
         end
 
         json do
-          required(:dateString).value(:time)
-          required(:type).value(included_in?: %w[mbg sgv])
-          optional(:mbg).value(:integer, gt?: 0)
-          optional(:sgv).value(:integer, gt?: 0)
+          required(:dateString).filled(:time)
+          required(:type).filled(included_in?: %w[mbg sgv])
+          optional(:mbg).filled(:integer, gt?: 0)
+          optional(:sgv).filled(:integer, gt?: 0)
         end
 
         rule(:mbg).validate(:entry_type)

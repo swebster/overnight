@@ -16,9 +16,9 @@ module Overnight
       # validates Nightscout API responses to authorization requests
       class Contract < Dry::Validation::Contract
         json do
-          required(:token).value(:string)
-          required(:sub).value(:string)
-          required(:permissionGroups).value(:array, min_size?: 1).each do
+          required(:token).filled(:string)
+          required(:sub).filled(:string)
+          required(:permissionGroups).filled(:array).each do
             array(:str?)
           end
           required(:iat).filled(Types::UnixTime)
