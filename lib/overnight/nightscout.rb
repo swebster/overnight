@@ -1,9 +1,7 @@
 # frozen_string_literal: true
 
 require 'overnight/nightscout/authorization'
-require 'overnight/nightscout/entry'
-require 'overnight/nightscout/device_status'
-require 'overnight/nightscout/status'
+require 'overnight/nightscout/sample'
 
 module Overnight
   # provides a wrapper around the Nightscout API
@@ -21,6 +19,10 @@ module Overnight
       end
       request_data
       parse_responses
+    end
+
+    def abort
+      @hydra.abort
     end
 
     private

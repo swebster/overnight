@@ -5,28 +5,49 @@ require 'bundler/setup'
 require 'overnight/nightscout'
 require 'rufus-scheduler'
 
-nightscout = Overnight::Nightscout.new
-scheduler = Rufus::Scheduler.new
-columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
-puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
+module Overnight
+  # controls periodic sampling of Nightscout data and output to the terminal
+  class Console
+    def initialize
+      @nightscout = Nightscout.new
+      @scheduler = Rufus::Scheduler.new
+    end
 
+    def sample_every(interval)
+      Nightscout::Sample.print_column_headers
+      @scheduler.every(interval, first: :now) do
+        print_glucose_values
+      rescue Overnight::Nightscout::Error => e
+        warn e.message
+      end
+    end
+
+    def start_sampling
+      @scheduler.join
+    end
+
+    def stop_sampling
+      @scheduler.shutdown(:wait)
+      @nightscout.abort
+    end
+
+    private
+
+    def print_glucose_values
+      time = Time.now
+      values = @nightscout.get.fetch_values(:entry, :device_status, :status)
+      Nightscout::Sample.new(time, *values).print_row
+    end
+  end
+end
+
+# handle interrupts as the normal way to terminate the process
 Signal.trap('INT') do
   puts
-  exit 130
+  exit
 end
 
-scheduler.every '5m', first: :now do
-  time_started = Time.now
-  data = nightscout.get
-  current = data[:entry].first
-  loop = data[:device_status].first
-  status = data[:status]
-
-  min_max = loop.predicted.first(12).minmax
-  s = time_started.localtime.strftime('%F %T ')
-  s << [status, current].map { |x| x.time.localtime.strftime('%T ') }.join
-  s << [current, *min_max].map { |y| status.format(y.glucose) }.join(' ')
-  puts s << format(' %5.2f %4.1f', loop.iob, loop.cob)
-end
-
-scheduler.join
+console = Overnight::Console.new
+at_exit { console.stop_sampling }
+console.sample_every('5m')
+console.start_sampling
