@@ -18,7 +18,7 @@ module Overnight
         end
 
         def find(glucose)
-          @categories.find { |category| category.include?(glucose) }
+          @categories.find { |category| category.include?(glucose.round) }
         end
 
         private
