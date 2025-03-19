@@ -18,7 +18,7 @@ module Overnight
         json do
           required(:dateString).filled(:time)
           required(:type).filled(included_in?: %w[mbg sgv])
-          optional(:mbg).filled(:integer, gt?: 0)
+          optional(:mbg).filled { (int? | float?) & gteq?(0) }
           optional(:sgv).filled(:integer, gt?: 0)
         end
 
