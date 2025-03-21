@@ -14,16 +14,14 @@ module Overnight
         options[:headers] = { Accept: 'application/json' }.merge(options[:headers] || {})
         options[:headers].merge!({ Authorization: "Bearer #{token.jwt}" }) if token
 
-        Typhoeus::Request.new(url, options).tap do |request|
-          request.on_complete { validate_http(_1) }
-        end
+        Typhoeus::Request.new(url, options)
       end
 
       def self.validate_http(response)
         if response.success?
           # valid; response.body should be in the expected format
         elsif response.timed_out?
-          raise Error, 'request timed out'
+          raise Error, 'HTTP request timed out'
         elsif response.code.zero?
           # could not get an HTTP response, something is wrong
           raise Error, response.return_message
@@ -41,12 +39,14 @@ module Overnight
       end
 
       def self.parse_array(response, contract)
+        validate_http(response)
         JSON.parse(response.body, symbolize_names: true).map do |element|
           validate_body(element, contract)
         end
       end
 
       def self.parse_hash(response, contract)
+        validate_http(response)
         validate_body(JSON.parse(response.body, symbolize_names: true), contract)
       end
     end
