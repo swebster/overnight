@@ -7,22 +7,19 @@ module Overnight
   # provides a wrapper around the Nightscout API
   class Nightscout
     def initialize(entry_params: {}, device_params: {})
-      @hydra = Typhoeus::Hydra.new
       @entry_params = entry_params.compact
       @device_params = device_params.compact
     end
 
     def get
-      if token_expiring?
-        request_authorization
-        create_requests
-      end
+      request_authorization if token_expiring?
+      create_requests
       request_data
       parse_responses
     end
 
     def abort
-      @hydra.abort
+      @hydra&.abort
     end
 
     private
@@ -45,6 +42,7 @@ module Overnight
     end
 
     def request_data
+      @hydra = Typhoeus::Hydra.new
       @requests.each_value { |request| @hydra.queue(request) }
       @hydra.run
     end
