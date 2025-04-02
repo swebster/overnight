@@ -2,7 +2,6 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require 'fugit'
 require 'overnight/nightscout'
 require 'rufus-scheduler'
 
@@ -16,10 +15,10 @@ module Overnight
 
     def sample_every(interval)
       Nightscout::Sample.print_column_headers
-      delay = Fugit::Duration.parse(interval).to_sec + 5
       @scheduler.every(interval, first: :now) do |job|
-        sample_time, entry_time = print_glucose_values
-        job.next_time = entry_time + delay if sample_time - entry_time < delay
+        sample = fetch_sample
+        sample.print_row
+        job.next_time = sample.next_time if sample.mistimed?
       rescue Overnight::Nightscout::Error => e
         warn e.message
       end
@@ -36,11 +35,10 @@ module Overnight
 
     private
 
-    def print_glucose_values
+    def fetch_sample
       time = Time.now
       values = @nightscout.get.fetch_values(:entry, :device_status, :status)
-      Nightscout::Sample.new(time, *values).print_row
-      [time, values.first.first.time]
+      Nightscout::Sample.new(time, *values)
     end
   end
 end
