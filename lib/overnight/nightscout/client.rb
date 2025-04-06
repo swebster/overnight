@@ -18,7 +18,10 @@ module Overnight
       end
 
       def self.validate_http(response)
-        if response.success?
+        if response.nil?
+          # possible if the host went to sleep before the server replied
+          raise Error, 'No HTTP response received'
+        elsif response.success?
           # valid; response.body should be in the expected format
         elsif response.timed_out?
           raise Error, 'HTTP request timed out'
