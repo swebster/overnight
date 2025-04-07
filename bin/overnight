@@ -18,6 +18,7 @@ module Overnight
       @scheduler.every(interval, first: :now) do |job|
         sample = fetch_sample
         sample.print_row
+        sample.print_transitions unless sample.stale?
         job.next_time = sample.next_time if sample.mistimed?
       rescue Overnight::Nightscout::Error => e
         warn e.message

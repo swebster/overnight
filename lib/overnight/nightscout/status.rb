@@ -24,9 +24,18 @@ module Overnight
         @glucose_ranges = GlucoseRanges.new(settings[:thresholds])
       end
 
+      def categorize(glucose)
+        find(glucose).name
+      end
+
       def format(glucose)
-        colour = @glucose_ranges.find(glucose).colour
-        colour.call(Kernel.format('%4.1f', glucose / 18.0))
+        find(glucose).colour.call(Kernel.format('%4.1f', glucose / 18.0))
+      end
+
+      private
+
+      def find(glucose)
+        @glucose_ranges.find(glucose)
       end
     end
   end
