@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'overnight/nightscout/client'
-require 'overnight/nightscout/device_status/contract'
+require 'overnight/nightscout/contracts/device_status'
 require 'overnight/nightscout/entry'
 
 module Overnight

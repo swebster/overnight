@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'overnight/nightscout/client'
-require 'overnight/nightscout/status/contract'
+require 'overnight/nightscout/contracts/status'
 require 'overnight/nightscout/status/glucose_ranges'
 
 module Overnight

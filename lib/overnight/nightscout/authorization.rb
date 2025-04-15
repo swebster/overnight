@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require 'jwt'
-require 'overnight/nightscout/authorization/contract'
 require 'overnight/nightscout/client'
 require 'overnight/nightscout/config'
+require 'overnight/nightscout/contracts/authorization'
 
 module Overnight
   class Nightscout

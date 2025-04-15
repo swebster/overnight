@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'overnight/nightscout/client'
-require 'overnight/nightscout/treatment/contract'
+require 'overnight/nightscout/contracts/treatment'
 
 module Overnight
   class Nightscout
