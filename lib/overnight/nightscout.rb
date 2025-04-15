@@ -39,6 +39,7 @@ module Overnight
       @requests[Entry] = Entry.request(token:, **@entry_params)
       @requests[DeviceStatus] = DeviceStatus.request(token:, **@device_params)
       @requests[Status] = Status.request(token:)
+      @requests[Treatment] = Treatment.request(token:)
     end
 
     def request_data

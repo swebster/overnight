@@ -38,7 +38,8 @@ module Overnight
 
     def fetch_sample
       time = Time.now
-      values = @nightscout.get.fetch_values(:entry, :device_status, :status)
+      keys = %i[entry device_status status treatment]
+      values = @nightscout.get.fetch_values(*keys)
       Nightscout::Sample.new(time, *values)
     end
   end

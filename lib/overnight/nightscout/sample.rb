@@ -5,6 +5,7 @@ require 'overnight/nightscout/entry'
 require 'overnight/nightscout/device_status'
 require 'overnight/nightscout/sample/synchronizer'
 require 'overnight/nightscout/status'
+require 'overnight/nightscout/treatment'
 
 module Overnight
   class Nightscout
@@ -14,11 +15,12 @@ module Overnight
       def_delegators :@synchronizer, :mistimed?, :next_time
       Transition = Data.define(:from, :to, :entry)
 
-      def initialize(time, entries, device_statuses, status)
+      def initialize(time, entries, device_statuses, status, treatments)
         @entries = entries
         @devices = device_statuses
         @status = status
         @synchronizer = Synchronizer.new(time, status.time, latest_entry.time)
+        @treatments = treatments
       end
 
       def self.print_column_headers
