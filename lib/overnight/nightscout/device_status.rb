@@ -15,7 +15,7 @@ module Overnight
       end
 
       def self.parse(response)
-        Client.parse_array(response, Contract.new).map { new(**_1) }
+        Client.parse_array(response, Contract.new).map { new(**it.to_h) }
       end
 
       def initialize(loop:)

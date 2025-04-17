@@ -35,10 +35,9 @@ module Overnight
       end
 
       def self.validate_body(element, contract)
-        result = contract.call(element)
-        raise Error, "#{contract.class}: errors=#{result.errors.to_h}" if result.failure?
-
-        result.to_h
+        contract.call(element).tap do |result|
+          raise Error, "#{contract.class}: errors=#{result.errors.to_h}" if result.failure?
+        end
       end
 
       def self.parse_array(response, contract)

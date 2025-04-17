@@ -15,7 +15,7 @@ module Overnight
       end
 
       def self.parse(response)
-        new(**Client.parse_hash(response, Contract.new))
+        new(**Client.parse_hash(response, Contract.new).to_h)
       end
 
       def initialize(status:, serverTime:, settings:)

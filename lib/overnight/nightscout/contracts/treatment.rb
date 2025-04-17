@@ -4,7 +4,15 @@ require 'dry-validation'
 
 module Overnight
   class Nightscout
-    class Treatment
+    module Treatment
+      EVENT_TYPES = [
+        'Temporary Override',
+        'Temp Basal',
+        'Carb Correction',
+        'Correction Bolus',
+        'Suspend Pump'
+      ].freeze
+
       TimedEventSchema = Dry::Schema.JSON do
         required(:timestamp).filled(:time)
       end
@@ -12,12 +20,7 @@ module Overnight
       # rubocop:disable Style/Documentation
       class EventTypeContract < Dry::Validation::Contract
         json do
-          required(:eventType).filled(included_in?:
-            ['Temporary Override',
-             'Temp Basal',
-             'Carb Correction',
-             'Correction Bolus',
-             'Suspend Pump'])
+          required(:eventType).filled(included_in?: Treatment::EVENT_TYPES)
         end
       end
 
@@ -52,27 +55,6 @@ module Overnight
         json(TimedEventSchema)
       end
       # rubocop:enable Style/Documentation
-
-      # validates Nightscout API responses to treatment requests
-      class Contract
-        def initialize
-          @event_type = EventTypeContract.new
-          @subcontracts = {
-            'Temporary Override' => TemporaryOverrideContract.new,
-            'Temp Basal' => TempBasalContract.new,
-            'Carb Correction' => CarbCorrectionContract.new,
-            'Correction Bolus' => CorrectionBolusContract.new,
-            'Suspend Pump' => SuspendPumpContract.new
-          }
-        end
-
-        def call(input, context = Dry::Core::Constants::EMPTY_HASH)
-          result = @event_type.call(input, context)
-          return result if result.failure?
-
-          @subcontracts[result[:eventType]].call(input, context.merge(result.to_h))
-        end
-      end
     end
   end
 end
