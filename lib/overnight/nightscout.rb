@@ -6,9 +6,10 @@ require 'overnight/nightscout/sample'
 module Overnight
   # provides a wrapper around the Nightscout API
   class Nightscout
-    def initialize(entry_params: {}, device_params: {})
+    def initialize(entry_params: {}, device_params: {}, treatment_params: {})
       @entry_params = entry_params.compact
       @device_params = device_params.compact
+      @treatment_params = treatment_params.compact
     end
 
     def get
@@ -39,7 +40,7 @@ module Overnight
       @requests[Entry] = Entry.request(token:, **@entry_params)
       @requests[DeviceStatus] = DeviceStatus.request(token:, **@device_params)
       @requests[Status] = Status.request(token:)
-      @requests[Treatment] = Treatment.request(token:)
+      @requests[Treatment] = Treatment.request(token:, **@treatment_params)
     end
 
     def request_data

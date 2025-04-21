@@ -19,8 +19,8 @@ module Overnight
 
       SuspendPump = Data.define(:timestamp)
 
-      def self.request(token:)
-        Client.request('treatments', token:)
+      def self.request(token:, count: 12)
+        Client.request('treatments', token:, params: { count: })
       end
 
       def self.parse(response)
