@@ -1,3 +1,4 @@
 /.env
 /.bundle/
+/test/overnight/nightscout/data/
 /vendor/
