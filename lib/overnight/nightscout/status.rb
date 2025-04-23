@@ -14,8 +14,8 @@ module Overnight
         Client.request('status', token:)
       end
 
-      def self.parse(response)
-        new(**Client.parse_hash(response, Contract.new).to_h)
+      def self.parse(response_body)
+        new(**Client.parse_hash(response_body, Contract.new).to_h)
       end
 
       def initialize(status:, serverTime:, settings:)

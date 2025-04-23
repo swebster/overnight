@@ -40,16 +40,14 @@ module Overnight
         end
       end
 
-      def self.parse_array(response, contract)
-        validate_http(response)
-        JSON.parse(response.body, symbolize_names: true).map do |element|
+      def self.parse_array(response_body, contract)
+        JSON.parse(response_body, symbolize_names: true).map do |element|
           validate_body(element, contract)
         end
       end
 
-      def self.parse_hash(response, contract)
-        validate_http(response)
-        validate_body(JSON.parse(response.body, symbolize_names: true), contract)
+      def self.parse_hash(response_body, contract)
+        validate_body(JSON.parse(response_body, symbolize_names: true), contract)
       end
     end
   end

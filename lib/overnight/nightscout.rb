@@ -12,11 +12,11 @@ module Overnight
       @treatment_params = treatment_params.compact
     end
 
-    def get
+    def get(validate: true)
       request_authorization if token_expiring?
       create_requests
       request_data
-      parse_responses
+      parse_responses(validate)
     end
 
     def abort
@@ -30,8 +30,9 @@ module Overnight
     end
 
     def request_authorization
-      request_auth = Authorization.request
-      @auth = Authorization.parse(request_auth.run)
+      response = Authorization.request.run
+      Client.validate_http(response)
+      @auth = Authorization.parse(response.body)
     end
 
     def create_requests
@@ -47,11 +48,14 @@ module Overnight
       @hydra = Typhoeus::Hydra.new
       @requests.each_value { |request| @hydra.queue(request) }
       @hydra.run
+      @requests.each_value { |request| Client.validate_http(request.response) }
     end
 
-    def parse_responses
+    def parse_responses(validate)
       @requests.map do |type, request|
-        [snake_sym(type.name.split('::').last), type.parse(request.response)]
+        response_body = request.response.body
+        value = validate ? type.parse(response_body) : JSON.parse(response_body)
+        [snake_sym(type.name.split('::').last), value]
       end.to_h
     end
 

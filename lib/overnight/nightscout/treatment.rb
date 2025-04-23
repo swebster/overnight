@@ -23,8 +23,8 @@ module Overnight
         Client.request('treatments', token:, params: { count: })
       end
 
-      def self.parse(response)
-        Client.parse_array(response, Contract.new).map { create(it) }
+      def self.parse(response_body)
+        Client.parse_array(response_body, Contract.new).map { create(it) }
       end
 
       def self.create(result)

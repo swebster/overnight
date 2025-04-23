@@ -13,8 +13,8 @@ module Overnight
         Client.request('entries', token:, params: { count: })
       end
 
-      def self.parse(response)
-        Client.parse_array(response, Contract.new).map { new(**it.to_h) }
+      def self.parse(response_body)
+        Client.parse_array(response_body, Contract.new).map { new(**it.to_h) }
       end
 
       def initialize(dateString:, type:, mbg: nil, sgv: nil)

@@ -16,8 +16,8 @@ module Overnight
         Client.request(authorization, 'v2')
       end
 
-      def self.parse(response)
-        new(**Client.parse_hash(response, Contract.new).to_h)
+      def self.parse(response_body)
+        new(**Client.parse_hash(response_body, Contract.new).to_h)
       end
 
       def initialize(token:, sub:, permissionGroups:, iat:, exp:)
