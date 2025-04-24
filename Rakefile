@@ -1,9 +1,12 @@
 # frozen_string_literal: true
 
-require 'bundler/setup'
 require 'minitest/test_task'
-require 'overnight/nightscout'
 require 'rake/clean'
+
+$LOAD_PATH.unshift(File.expand_path('lib', __dir__))
+module Overnight # rubocop:disable Style/Documentation
+  autoload :Nightscout, 'overnight/nightscout'
+end
 
 Minitest::TestTask.create
 
