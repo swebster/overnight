@@ -2,6 +2,7 @@
 
 require 'overnight/nightscout/authorization'
 require 'overnight/nightscout/sample'
+require 'overnight/utils'
 
 module Overnight
   # provides a wrapper around the Nightscout API
@@ -55,12 +56,8 @@ module Overnight
       @requests.map do |type, request|
         response_body = request.response.body
         value = validate ? type.parse(response_body) : JSON.parse(response_body)
-        [snake_sym(type.name.split('::').last), value]
+        [Overnight::Utils.snake_sym(type.name.split('::').last), value]
       end.to_h
-    end
-
-    def snake_sym(subtype)
-      subtype.gsub(/(?<=[a-z])(?=[A-Z])/, '_').downcase.to_sym
     end
   end
 end
