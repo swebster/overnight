@@ -3,6 +3,7 @@
 require 'forwardable'
 require 'overnight/nightscout/entry'
 require 'overnight/nightscout/device_status'
+require 'overnight/nightscout/sample/printer'
 require 'overnight/nightscout/sample/synchronizer'
 require 'overnight/nightscout/status'
 require 'overnight/nightscout/treatment'
@@ -24,24 +25,21 @@ module Overnight
       end
 
       def self.print_column_headers
-        columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
-        puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
+        Printer.print_column_headers
       end
 
       def stale?
         @synchronizer.missed_samples.positive?
       end
 
-      def print_row # rubocop:disable Metrics/AbcSize
-        s = @synchronizer.request_time.localtime.strftime('%F %T ')
-        s << [@status, latest_entry].map { |x| x.time.localtime.strftime('%T ') }.join
-        s << [latest_entry, *min_max(12)].map { |y| @status.format(y.glucose) }.join(' ')
-        puts s << format(' %5.2f %4.1f', loop.iob, loop.cob)
+      def print_row
+        entries = [latest_entry, *min_max(12)]
+        Printer.print_row(@synchronizer.request_time, @status, entries, loop)
       end
 
       def print_transitions
         transitions(24).each do |t|
-          puts "#{t.entry.time.localtime.strftime('%F %T')} #{t.from} -> #{t.to}"
+          puts "#{Printer.format_date_time(t.entry.time)} #{t.from} -> #{t.to}"
         end
       end
 
