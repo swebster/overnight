@@ -1,12 +1,7 @@
 # frozen_string_literal: true
 
-require 'forwardable'
-require 'overnight/nightscout/entry'
-require 'overnight/nightscout/device_status'
-require 'overnight/nightscout/sample/printer'
+require 'overnight/nightscout/sample/predictor'
 require 'overnight/nightscout/sample/synchronizer'
-require 'overnight/nightscout/status'
-require 'overnight/nightscout/treatment'
 
 module Overnight
   class Nightscout
@@ -14,7 +9,10 @@ module Overnight
     class Sample
       extend Forwardable
       def_delegators :@synchronizer, :mistimed?, :next_time
-      Transition = Data.define(:from, :to, :entry)
+
+      def self.print_column_headers
+        Printer.print_column_headers
+      end
 
       def initialize(time, entries, device_statuses, status, treatments)
         @entries = entries
@@ -24,26 +22,25 @@ module Overnight
         @treatments = treatments
       end
 
-      def self.print_column_headers
-        Printer.print_column_headers
-      end
-
-      def stale?
-        @synchronizer.missed_samples.positive?
-      end
-
       def print_row
         entries = [latest_entry, *min_max(12)]
         Printer.print_row(@synchronizer.request_time, @status, entries, loop)
       end
 
       def print_transitions
-        transitions(24).each do |t|
-          puts "#{Printer.format_date_time(t.entry.time)} #{t.from} -> #{t.to}"
-        end
+        predictor = Predictor.new(first_in_each_range(24), @treatments)
+        predictor.print_transitions
+      end
+
+      def stale?
+        @synchronizer.missed_samples.positive?
       end
 
       private
+
+      def categorize(entry)
+        @status.categorize(entry.glucose)
+      end
 
       def latest_entry
         @entries.first
@@ -61,11 +58,10 @@ module Overnight
         loop.predicted.take(count)
       end
 
-      def transitions(count)
+      def first_in_each_range(count)
         entries = [latest_entry, *predictions(count)]
-        categorized = entries.map { |e| @status.categorize(e.glucose) }
-        cons = categorized.each_cons(2).with_index.reject { |(a, b), _i| a == b }
-        cons.reduce([]) { |t, ((a, b), i)| t << Transition.new(a, b, entries[i + 1]) }
+        categorized = entries.map { EntryRange.new(it, categorize(it)) }
+        categorized.slice_when { |a, b| a.range != b.range }.map(&:first)
       end
     end
   end

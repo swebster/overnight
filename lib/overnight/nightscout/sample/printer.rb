@@ -1,5 +1,9 @@
 # frozen_string_literal: true
 
+require 'overnight/nightscout/device_status'
+require 'overnight/nightscout/entry'
+require 'overnight/nightscout/status'
+
 module Overnight
   class Nightscout
     class Sample
@@ -12,12 +16,12 @@ module Overnight
           puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
         end
 
-        def print_row(request_time, status, entries, loop)
+        def print_row(request_time, status, entries, device_status)
           local_date = format_date_time(request_time)
           times = format_times([status, entries.first].map(&:time))
           glucose_values = format_glucose_values(status, entries)
-          iob = format_iob(loop.iob)
-          cob = format_cob(loop.cob)
+          iob = format_iob(device_status.iob)
+          cob = format_cob(device_status.cob)
           puts "#{local_date} #{times} #{glucose_values} #{iob} #{cob}"
         end
 
