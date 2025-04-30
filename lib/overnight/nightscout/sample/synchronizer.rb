@@ -5,6 +5,11 @@ module Overnight
     class Sample
       # adjusts sample timing to request data ASAP after it becomes available
       class Synchronizer
+        LOOP_INTERVAL = 300.0
+        MINIMUM_DELAY =  10.0
+        MAXIMUM_DELAY =  20.0
+        TARGET_DELAY  = (MINIMUM_DELAY + MAXIMUM_DELAY) / 2.0
+
         attr_reader :request_time, :server_time, :sample_time
 
         def initialize(request_time, server_time, sample_time)
@@ -14,28 +19,20 @@ module Overnight
         end
 
         def mistimed?
-          !delay.between?(self.class.minimum_delay, self.class.maximum_delay)
+          !delay.between?(MINIMUM_DELAY, MAXIMUM_DELAY)
         end
 
         def missed_samples
-          ((server_time - sample_time) / self.class.loop_interval).floor.clamp(0..)
+          ((server_time - sample_time) / LOOP_INTERVAL).floor.clamp(0..)
         end
 
         def next_sample
-          sample_time + self.class.loop_interval * (missed_samples + 1)
+          sample_time + LOOP_INTERVAL * (missed_samples + 1)
         end
 
         def next_time
-          next_sample - latency + self.class.target_delay
+          next_sample - latency + TARGET_DELAY
         end
-
-        def self.target_delay
-          (minimum_delay + maximum_delay) / 2.0
-        end
-
-        def self.loop_interval = 300.0
-        def self.minimum_delay =  10.0
-        def self.maximum_delay =  20.0
 
         private
 
@@ -44,7 +41,7 @@ module Overnight
         end
 
         def delay
-          (server_time - sample_time) % self.class.loop_interval
+          (server_time - sample_time) % LOOP_INTERVAL
         end
       end
     end
