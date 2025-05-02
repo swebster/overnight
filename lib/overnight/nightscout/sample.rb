@@ -28,7 +28,7 @@ module Overnight
       end
 
       def print_transitions
-        predictor = Predictor.new(first_in_each_range(24), @treatments)
+        predictor = Predictor.new(consolidate_entry_ranges, @treatments)
         predictor.print_transitions
       end
 
@@ -51,17 +51,20 @@ module Overnight
       end
 
       def min_max(count)
-        predictions(count).minmax
+        loop.predicted.take(count).minmax
       end
 
-      def predictions(count)
-        loop.predicted.take(count)
+      def group_entries_by_range
+        entries = [latest_entry] + loop.predicted
+        grouped = entries.slice_when { |a, b| categorize(a) != categorize(b) }
+        grouped.map { [categorize(it.first), it] }
       end
 
-      def first_in_each_range(count)
-        entries = [latest_entry, *predictions(count)]
-        categorized = entries.map { EntryRange.new(it, categorize(it)) }
-        categorized.slice_when { |a, b| a.range != b.range }.map(&:first)
+      def consolidate_entry_ranges
+        group_entries_by_range.map do |range, entries|
+          duration = entries.last.time - entries.first.time + Synchronizer::LOOP_INTERVAL
+          EntryRange.new(entries.first, range, duration)
+        end
       end
     end
   end
