@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
-require 'overnight/nightscout/sample/predictor'
-require 'overnight/nightscout/sample/synchronizer'
+require 'overnight/nightscout/sample/entry_range'
+require 'overnight/nightscout/status'
+require 'overnight/nightscout/treatment'
 
 module Overnight
   class Nightscout
@@ -23,13 +24,13 @@ module Overnight
       end
 
       def print_row
-        entries = [latest_entry, *min_max(12)]
+        entries = [latest_entry] + predicted_entries(12).minmax
         Printer.print_row(@synchronizer.request_time, @status, entries, loop)
       end
 
       def print_transitions
-        predictor = Predictor.new(consolidate_entry_ranges, @treatments)
-        predictor.print_transitions
+        print = EntryRange.method(:print_transition)
+        EntryRange.each_transition(entry_ranges, &print)
       end
 
       def stale?
@@ -42,6 +43,11 @@ module Overnight
         @status.categorize(entry.glucose)
       end
 
+      def entry_ranges
+        entries = [latest_entry] + predicted_entries(24)
+        EntryRange.consolidate(entries, &method(:categorize))
+      end
+
       def latest_entry
         @entries.first
       end
@@ -50,21 +56,8 @@ module Overnight
         @devices.first
       end
 
-      def min_max(count)
-        loop.predicted.take(count).minmax
-      end
-
-      def group_entries_by_range
-        entries = [latest_entry] + loop.predicted
-        grouped = entries.slice_when { |a, b| categorize(a) != categorize(b) }
-        grouped.map { [categorize(it.first), it] }
-      end
-
-      def consolidate_entry_ranges
-        group_entries_by_range.map do |range, entries|
-          duration = entries.last.time - entries.first.time + Synchronizer::LOOP_INTERVAL
-          EntryRange.new(entries.first, range, duration)
-        end
+      def predicted_entries(count)
+        loop.predicted.take(count)
       end
     end
   end
