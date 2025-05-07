@@ -19,7 +19,7 @@ module Overnight
         def print_row(request_time, status, entries, device_status)
           local_date = format_date_time(request_time)
           times = format_times([status, entries.first].map(&:time))
-          glucose_values = format_glucose_values(status, entries)
+          glucose_values = entries.map { status.format(it.glucose) }.join(' ')
           iob = format_iob(device_status.iob)
           cob = format_cob(device_status.cob)
           puts "#{local_date} #{times} #{glucose_values} #{iob} #{cob}"
@@ -29,12 +29,16 @@ module Overnight
           time.localtime.strftime('%F %T')
         end
 
-        def format_times(times)
-          times.map { it.localtime.strftime('%T') }.join(' ')
+        def format_time(time)
+          time.localtime.strftime('%T')
         end
 
-        def format_glucose_values(status, entries)
-          entries.map { status.format(it.glucose) }.join(' ')
+        def format_times(times)
+          times.map { format_time(it) }.join(' ')
+        end
+
+        def format_glucose(glucose)
+          format('%.1f', glucose / 18.0)
         end
 
         def format_iob(iob)

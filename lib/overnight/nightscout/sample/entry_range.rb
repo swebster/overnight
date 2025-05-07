@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'overnight/nightscout/entry'
 require 'overnight/nightscout/error'
 require 'overnight/nightscout/sample/printer'
 require 'overnight/nightscout/sample/synchronizer'
@@ -7,10 +8,9 @@ require 'overnight/nightscout/sample/synchronizer'
 module Overnight
   class Nightscout
     class Sample
-      # extends Entry with a range that corresponds to its glucose value
-      # and the predicted duration that glucose will remain in that range
+      # summarises a contiguous sequence of entries in a given glucose range
       class EntryRange
-        attr_reader :time, :glucose, :range, :duration
+        attr_reader :time, :min_entry, :max_entry, :range, :duration
 
         VALID_RANGES = %i[urgent_low low normal high urgent_high].freeze
 
@@ -22,7 +22,7 @@ module Overnight
         def self.consolidate(entries, &to_range)
           group_entries_by_range(entries, &to_range).map do |range, group|
             duration = group.last.time - group.first.time + Synchronizer::LOOP_INTERVAL
-            EntryRange.new(group.first.time, group.first.glucose, range, duration)
+            EntryRange.new(group.first.time, group.minmax, range, duration)
           end
         end
 
@@ -40,11 +40,12 @@ module Overnight
           puts string
         end
 
-        def initialize(time, glucose, range, duration)
+        def initialize(time, min_max, range, duration)
           raise Error, 'Invalid glucose range' unless VALID_RANGES.include?(range)
 
           @time = time
-          @glucose = glucose
+          @min_entry = min_max.first
+          @max_entry = min_max.last
           @range = range
           @duration = duration
         end

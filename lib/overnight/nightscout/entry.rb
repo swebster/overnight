@@ -7,6 +7,8 @@ module Overnight
   class Nightscout
     # blood glucose readings, either from a CGM (type: "sgv") or manual (type: "mbg")
     class Entry
+      include Comparable
+
       attr_reader :time, :glucose
 
       def self.request(token:, count: 12)
@@ -23,7 +25,10 @@ module Overnight
       end
 
       def <=>(other)
-        @glucose <=> other.glucose
+        return nil unless other.is_a?(self.class)
+
+        # order by glucose, then take the earliest entry with that glucose value
+        2 * (@glucose <=> other.glucose) + (@time <=> other.time)
       end
     end
   end

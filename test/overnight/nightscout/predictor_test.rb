@@ -3,6 +3,7 @@
 require 'minitest/autorun'
 require 'overnight/nightscout/sample/predictor'
 
+Entry      = Overnight::Nightscout::Entry
 Error      = Overnight::Nightscout::Error
 EntryRange = Overnight::Nightscout::Sample::EntryRange
 Predictor  = Overnight::Nightscout::Sample::Predictor
@@ -50,6 +51,12 @@ class TestPredictor < Minitest::Test
     assert_equal false, pred.low_predicted?
   end
 
+  def test_low_predicted_when_low
+    er = create_er_minutes([:low], [120])
+    pred = create_predictor(er)
+    assert_equal true, pred.low_predicted?
+  end
+
   def test_low_not_predicted_when_later
     er = create_er_seconds(%i[normal low], [LOW_NOTICE + 1, LOW_DURATION + 1])
     pred = create_predictor(er)
@@ -74,6 +81,12 @@ class TestPredictor < Minitest::Test
     assert_equal false, pred.high_predicted?
   end
 
+  def test_high_predicted_when_high
+    er = create_er_minutes([:high], [120])
+    pred = create_predictor(er)
+    assert_equal true, pred.high_predicted?
+  end
+
   def test_high_not_predicted_when_later
     er = create_er_seconds(%i[normal high], [HIGH_NOTICE + 1, HIGH_DURATION + 1])
     pred = create_predictor(er)
@@ -92,6 +105,26 @@ class TestPredictor < Minitest::Test
     assert_equal true, pred.high_predicted?
   end
 
+  def test_problem_when_predicted_low
+    er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
+    pred = create_predictor(er)
+    refute_empty pred.problems
+    refute_empty pred.problems.first
+  end
+
+  def test_no_problems_when_normal
+    er = create_er_minutes([:normal], [120])
+    pred = create_predictor(er)
+    assert_empty pred.problems
+  end
+
+  def test_problem_when_predicted_high
+    er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
+    pred = create_predictor(er)
+    refute_empty pred.problems
+    refute_empty pred.problems.first
+  end
+
   private
 
   def create_er_seconds(ranges, durations_seconds)
@@ -103,8 +136,15 @@ class TestPredictor < Minitest::Test
     ranges.each_with_index.map do |range, index|
       time = start_time + durations.take(index).sum * 60
       duration = (durations[index] * 60).round
-      EntryRange.new(time, RANGE_GLUCOSE[range], range, duration)
+      EntryRange.new(time, create_min_max(time, range, duration), range, duration)
     end
+  end
+
+  def create_min_max(min_time, range, duration)
+    max_time = min_time + duration - Synchronizer::LOOP_INTERVAL
+    min = Entry.new(dateString: min_time, type: 'sgv', sgv: RANGE_GLUCOSE[range])
+    max = Entry.new(dateString: max_time, type: 'sgv', sgv: RANGE_GLUCOSE[range])
+    [min, max]
   end
 
   def create_predictor(entry_ranges)

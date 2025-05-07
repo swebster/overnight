@@ -1,8 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'overnight/nightscout/sample/entry_range'
-require 'overnight/nightscout/treatment'
+require 'overnight/nightscout/sample/predictor'
 
 module Overnight
   class Nightscout
@@ -33,6 +32,11 @@ module Overnight
         EntryRange.each_transition(entry_ranges, &print)
       end
 
+      def print_problems
+        problems = Predictor.new(entry_ranges, @treatments).problems
+        problems.each { |problem| puts "Warning: #{problem}" }
+      end
+
       def stale?
         @synchronizer.missed_samples.positive?
       end
@@ -43,9 +47,13 @@ module Overnight
         @status.categorize(entry.glucose)
       end
 
-      def entry_ranges
+      def create_entry_ranges
         entries = [latest_entry] + predicted_entries(24)
         EntryRange.consolidate(entries, &method(:categorize))
+      end
+
+      def entry_ranges
+        @entry_ranges ||= create_entry_ranges
       end
 
       def latest_entry
