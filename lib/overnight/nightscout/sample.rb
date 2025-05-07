@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
+require 'forwardable'
 require 'overnight/nightscout/sample/entry_range'
-require 'overnight/nightscout/status'
 require 'overnight/nightscout/treatment'
 
 module Overnight
