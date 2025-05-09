@@ -2,7 +2,7 @@
 
 require 'overnight/nightscout/entry'
 require 'overnight/nightscout/error'
-require 'overnight/nightscout/sample/printer'
+require 'overnight/nightscout/printer'
 require 'overnight/nightscout/sample/synchronizer'
 
 module Overnight
