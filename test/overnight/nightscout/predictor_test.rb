@@ -8,7 +8,7 @@ Error      = Overnight::Nightscout::Error
 EntryRange = Overnight::Nightscout::Sample::EntryRange
 Predictor  = Overnight::Nightscout::Sample::Predictor
 
-class TestPredictor < Minitest::Test
+class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   LOW_NOTICE    = Predictor::LOW_NOTICE
   HIGH_NOTICE   = Predictor::HIGH_NOTICE
   LOW_DURATION  = Predictor::LOW_DURATION
@@ -25,24 +25,6 @@ class TestPredictor < Minitest::Test
   def test_empty_raises_error
     error = assert_raises(Error) { create_predictor([]) }
     assert_equal 'No glucose entries provided', error.message
-  end
-
-  def test_find_nothing_when_normal
-    er = create_er_minutes([:normal], [120])
-    pred = create_predictor(er)
-    assert_equal [], pred.find_predicted([:low])
-  end
-
-  def test_find_predicted_low
-    er = create_er_minutes(%i[normal low normal], [15, 30, 75])
-    pred = create_predictor(er)
-    assert_equal er[1..1], pred.find_predicted([:low])
-  end
-
-  def test_find_predicted_lows
-    er = create_er_minutes(%i[normal low urgent_low low], [75, 20, 5, 20])
-    pred = create_predictor(er)
-    assert_equal er[1..3], pred.find_predicted(%i[low urgent_low])
   end
 
   def test_low_not_predicted_when_normal

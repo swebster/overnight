@@ -25,11 +25,6 @@ module Overnight
           @treatments = treatments
         end
 
-        def find_predicted(ranges)
-          found = @entry_ranges.drop_while { !ranges.include?(it.range) }
-          found.take_while { ranges.include?(it.range) }.to_a
-        end
-
         def low_predicted?
           predicted_low.any?
         end
@@ -49,6 +44,11 @@ module Overnight
         end
 
         private
+
+        def find_predicted(ranges)
+          found = @entry_ranges.drop_while { !ranges.include?(it.range) }
+          found.take_while { ranges.include?(it.range) }.to_a
+        end
 
         def in_range_soon?(entry_ranges, notice_period)
           entry_ranges.any? && entry_ranges.first.time <= Time.now + notice_period
@@ -87,7 +87,7 @@ module Overnight
           string = "#{type.capitalize} #{problem} "
           string << "#{format_time(entry_ranges, type)} "
           string << "#{(get_duration(entry_ranges, type) / 60).round} minutes, "
-          string << "#{format_min_max(entry_ranges, problem)} if untreated."
+          string << "#{format_min_max(entry_ranges, problem)} if untreated"
         end
 
         def format_time(entry_ranges, type)
