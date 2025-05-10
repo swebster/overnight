@@ -6,8 +6,8 @@ require 'overnight/nightscout/predictor'
 Constants  = Overnight::Nightscout::Constants
 Entry      = Overnight::Nightscout::Entry
 Error      = Overnight::Nightscout::Error
-EntryRange = Overnight::Nightscout::Sample::EntryRange
-Predictor  = Overnight::Nightscout::Sample::Predictor
+EntryRange = Overnight::Nightscout::EntryRange
+Predictor  = Overnight::Nightscout::Predictor
 
 class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   LOW_NOTICE    = Predictor::LOW_NOTICE
