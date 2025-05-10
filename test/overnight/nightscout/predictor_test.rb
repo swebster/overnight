@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'minitest/autorun'
-require 'overnight/nightscout/sample/predictor'
+require 'overnight/nightscout/predictor'
 
 Constants  = Overnight::Nightscout::Constants
 Entry      = Overnight::Nightscout::Entry

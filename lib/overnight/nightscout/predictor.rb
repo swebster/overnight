@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'overnight/nightscout/sample/entry_range'
+require 'overnight/nightscout/entry_range'
 require 'overnight/nightscout/treatment'
 
 module Overnight

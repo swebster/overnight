@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'overnight/nightscout/sample/predictor'
+require 'overnight/nightscout/predictor'
 require 'overnight/nightscout/sample/synchronizer'
 
 module Overnight
