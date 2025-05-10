@@ -3,6 +3,7 @@
 require 'minitest/autorun'
 require 'overnight/nightscout/sample/predictor'
 
+Constants  = Overnight::Nightscout::Constants
 Entry      = Overnight::Nightscout::Entry
 Error      = Overnight::Nightscout::Error
 EntryRange = Overnight::Nightscout::Sample::EntryRange
@@ -123,7 +124,7 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   end
 
   def create_min_max(min_time, range, duration)
-    max_time = min_time + duration - Synchronizer::LOOP_INTERVAL
+    max_time = min_time + duration - Constants::LOOP_INTERVAL
     min = Entry.new(dateString: min_time, type: 'sgv', sgv: RANGE_GLUCOSE[range])
     max = Entry.new(dateString: max_time, type: 'sgv', sgv: RANGE_GLUCOSE[range])
     [min, max]

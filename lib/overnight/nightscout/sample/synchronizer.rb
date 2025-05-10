@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
+require 'overnight/nightscout/constants'
+
 module Overnight
   class Nightscout
     class Sample
       # adjusts sample timing to request data ASAP after it becomes available
       class Synchronizer
-        LOOP_INTERVAL = 300.0
+        LOOP_INTERVAL = Constants::LOOP_INTERVAL
         MINIMUM_DELAY =  10.0
         MAXIMUM_DELAY =  20.0
         TARGET_DELAY  = (MINIMUM_DELAY + MAXIMUM_DELAY) / 2.0

@@ -2,6 +2,7 @@
 
 require 'forwardable'
 require 'overnight/nightscout/sample/predictor'
+require 'overnight/nightscout/sample/synchronizer'
 
 module Overnight
   class Nightscout

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
+require 'overnight/nightscout/constants'
 require 'overnight/nightscout/entry'
 require 'overnight/nightscout/error'
 require 'overnight/nightscout/printer'
-require 'overnight/nightscout/sample/synchronizer'
 
 module Overnight
   class Nightscout
@@ -21,7 +21,7 @@ module Overnight
 
         def self.consolidate(entries, &to_range)
           group_entries_by_range(entries, &to_range).map do |range, group|
-            duration = group.last.time - group.first.time + Synchronizer::LOOP_INTERVAL
+            duration = group.last.time - group.first.time + Constants::LOOP_INTERVAL
             EntryRange.new(group.first.time, group.minmax, range, duration)
           end
         end
