@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
 require 'forwardable'
+require 'overnight/nightscout/device_status'
 require 'overnight/nightscout/predictor'
 require 'overnight/nightscout/sample/synchronizer'
+require 'overnight/nightscout/status'
 
 module Overnight
   class Nightscout
@@ -12,7 +14,8 @@ module Overnight
       def_delegators :@synchronizer, :mistimed?, :next_time
 
       def self.print_column_headers
-        Printer.print_column_headers
+        columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
+        puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
       end
 
       def initialize(time, entries, device_statuses, status, treatments)
@@ -23,9 +26,14 @@ module Overnight
         @treatments = treatments
       end
 
-      def print_row
+      def print_row # rubocop:disable Metrics/AbcSize
         entries = [latest_entry] + predicted_entries(12).minmax
-        Printer.print_row(@synchronizer.request_time, @status, entries, loop)
+        local_date = Printer.format_date_time(@synchronizer.request_time)
+        times = Printer.format_times([@status, entries.first].map(&:time))
+        glucose_values = entries.map { format_glucose(it) }.join(' ')
+        iob = Printer.format_iob(loop.iob)
+        cob = Printer.format_cob(loop.cob)
+        puts "#{local_date} #{times} #{glucose_values} #{iob} #{cob}"
       end
 
       def print_transitions
@@ -55,6 +63,10 @@ module Overnight
 
       def entry_ranges
         @entry_ranges ||= create_entry_ranges
+      end
+
+      def format_glucose(entry)
+        Printer.format_glucose(entry.glucose, categorize(entry), fixed_width: true)
       end
 
       def latest_entry

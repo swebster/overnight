@@ -16,10 +16,10 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   HIGH_DURATION = Predictor::HIGH_DURATION
 
   RANGE_GLUCOSE = {
-    urgent_low: 54,
-    low: 79,
-    normal: 108,
-    high: 181,
+     urgent_low: 54,
+            low: 79,
+         normal: 108,
+           high: 181,
     urgent_high: 247
   }.freeze
 

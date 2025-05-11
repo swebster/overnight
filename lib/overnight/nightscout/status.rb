@@ -25,17 +25,7 @@ module Overnight
       end
 
       def categorize(glucose)
-        find(glucose).name
-      end
-
-      def format(glucose)
-        find(glucose).colour.call(Kernel.format('%4.1f', glucose / 18.0))
-      end
-
-      private
-
-      def find(glucose)
-        @glucose_ranges.find(glucose)
+        @glucose_ranges.find(glucose).name
       end
     end
   end

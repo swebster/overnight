@@ -1,12 +1,11 @@
 # frozen_string_literal: true
 
 require 'forwardable'
-require 'rainbow'
 
 module Overnight
   class Nightscout
     class Status
-      Category = Data.define(:range, :name, :colour) do
+      Category = Data.define(:range, :name) do
         extend Forwardable
         def_delegators :range, :include?
       end
@@ -18,7 +17,7 @@ module Overnight
         end
 
         def find(glucose)
-          @categories.find { |category| category.include?(glucose.round) }
+          @categories.find { it.include?(glucose.round) }
         end
 
         private
@@ -36,12 +35,12 @@ module Overnight
           bounds.each_slice(2).map { |min_max| Range.new(*min_max) }
         end
 
-        def map_categories(ranges) # rubocop:disable Metrics/AbcSize
-          urgent_low  = Category.new(ranges[0], :urgent_low,  ->(s) { Rainbow(s).bg(:red) })
-          low         = Category.new(ranges[1], :low,         ->(s) { Rainbow(s).red })
-          normal      = Category.new(ranges[2], :normal,      ->(s) { s })
-          high        = Category.new(ranges[3], :high,        ->(s) { Rainbow(s).yellow })
-          urgent_high = Category.new(ranges[4], :urgent_high, ->(s) { Rainbow(s).black.bg(:yellow) })
+        def map_categories(ranges)
+          urgent_low  = Category.new(ranges[0], :urgent_low)
+          low         = Category.new(ranges[1], :low)
+          normal      = Category.new(ranges[2], :normal)
+          high        = Category.new(ranges[3], :high)
+          urgent_high = Category.new(ranges[4], :urgent_high)
 
           # sort these in descending frequency order, i.e. common to rare
           [normal, high, low, urgent_high, urgent_low]

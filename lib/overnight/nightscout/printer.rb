@@ -1,28 +1,19 @@
 # frozen_string_literal: true
 
-require 'overnight/nightscout/device_status'
-require 'overnight/nightscout/entry'
-require 'overnight/nightscout/status'
+require 'rainbow'
 
 module Overnight
   class Nightscout
-    # provides methods to print various sample details to $stdout
+    # standardises formatting when printing various properties to $stdout
     module Printer
+      RANGE_COLOURS = Hash.new { ->(s) { s } }.update({
+         urgent_low: ->(s) { Rainbow(s).bg(:red) },
+                low: ->(s) { Rainbow(s).red },
+               high: ->(s) { Rainbow(s).yellow },
+        urgent_high: ->(s) { Rainbow(s).black.bg(:yellow) }
+      }).freeze
+
       module_function
-
-      def print_column_headers
-        columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
-        puts format('%-10 8 8 8 4 4 4 5 4s'.gsub(' ', 's %-'), *columns)
-      end
-
-      def print_row(request_time, status, entries, device_status)
-        local_date = format_date_time(request_time)
-        times = format_times([status, entries.first].map(&:time))
-        glucose_values = entries.map { status.format(it.glucose) }.join(' ')
-        iob = format_iob(device_status.iob)
-        cob = format_cob(device_status.cob)
-        puts "#{local_date} #{times} #{glucose_values} #{iob} #{cob}"
-      end
 
       def format_date_time(time)
         time.localtime.strftime('%F %T')
@@ -36,8 +27,9 @@ module Overnight
         times.map { format_time(it) }.join(' ')
       end
 
-      def format_glucose(glucose)
-        format('%.1f', glucose / 18.0)
+      def format_glucose(glucose, range, fixed_width: false)
+        format_string = fixed_width ? '%4.1f' : '%.1f'
+        RANGE_COLOURS[range].call(format(format_string, glucose / 18.0))
       end
 
       def format_iob(iob)

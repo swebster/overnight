@@ -83,10 +83,10 @@ module Overnight
       end
 
       def format_problem(entry_ranges, problem, type)
-        string = "#{type.capitalize} #{problem} "
-        string << "#{format_time(entry_ranges, type)} "
-        string << "#{(get_duration(entry_ranges, type) / 60).round} minutes, "
-        string << "#{format_min_max(entry_ranges, problem)} if untreated"
+        time = format_time(entry_ranges, type)
+        duration = (get_duration(entry_ranges, type) / 60).round
+        min_max = format_min_max(entry_ranges, problem)
+        "#{type.capitalize} #{problem} #{time} #{duration} minutes, #{min_max}"
       end
 
       def format_time(entry_ranges, type)
@@ -107,18 +107,18 @@ module Overnight
 
       def format_min_max(entry_ranges, problem)
         if problem == :low
-          min = entry_ranges.map(&:min_entry).min
-          "falling to #{format_glucose_time(min)}"
+          min = entry_ranges.min_by(&:min_entry)
+          "falling to #{format_glucose_time(min.min_entry, min.range)}"
         else # :high
-          max = entry_ranges.map(&:max_entry).max
-          "rising to #{format_glucose_time(max)}"
+          max = entry_ranges.max_by(&:max_entry)
+          "rising to #{format_glucose_time(max.max_entry, max.range)}"
         end
       end
 
-      def format_glucose_time(entry)
-        glucose = Printer.format_glucose(entry.glucose)
+      def format_glucose_time(entry, range)
+        glucose = Printer.format_glucose(entry.glucose, range)
         time = Printer.format_time(entry.time)
-        "#{glucose} at #{time}"
+        "#{glucose} by #{time}"
       end
 
       def low_treated?

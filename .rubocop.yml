@@ -2,3 +2,10 @@
 # the default (annotated) style requires a lot of redundant repetition
 Style/FormatStringToken:
   EnforcedStyle: unannotated
+
+# it is much easier to parse a hash when all its elements are aligned
+Layout/HashAlignment:
+  EnforcedColonStyle: separator
+
+Layout/FirstHashElementIndentation:
+  EnforcedStyle: consistent
