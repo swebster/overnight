@@ -15,6 +15,10 @@ module Overnight
 
       module_function
 
+      def format_plain(string)
+        Rainbow.uncolor(string)
+      end
+
       def format_date_time(time)
         time.localtime.strftime('%F %T')
       end

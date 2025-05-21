@@ -45,9 +45,11 @@ module Overnight
     end
 
     def warn_listeners(problems)
-      # print all warnings to $stdout before posting (which might raise an error)
+      return if problems.empty?
+
       problems.each { puts "Warning: #{it}" }
-      problems.each { Pushover.post(it) } # rubocop:disable Style/CombinableLoops
+      message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
+      Pushover.post(message)
     end
   end
 end
