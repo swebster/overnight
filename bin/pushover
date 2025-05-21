@@ -2,6 +2,12 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
+require 'json'
 require 'overnight/pushover'
 
-Overnight::Pushover.post('Initial test')
+begin
+  response_body = Overnight::Pushover.post('Initial test')
+  puts JSON.pretty_generate(JSON.parse(response_body))
+rescue Overnight::Error => e
+  warn e.message
+end
