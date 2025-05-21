@@ -41,9 +41,8 @@ module Overnight
         EntryRange.each_transition(entry_ranges, &print)
       end
 
-      def print_problems
-        problems = Predictor.new(entry_ranges, @treatments).problems
-        problems.each { |problem| puts "Warning: #{problem}" }
+      def problems
+        Predictor.new(entry_ranges, @treatments).problems
       end
 
       def stale?

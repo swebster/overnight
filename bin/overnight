@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 require 'overnight/nightscout'
+require 'overnight/pushover'
 require 'rufus-scheduler'
 
 module Overnight
@@ -18,7 +19,7 @@ module Overnight
       @scheduler.every(interval, first: :now) do |job|
         sample = fetch_sample
         sample.print_row
-        sample.print_problems unless sample.stale?
+        warn_listeners(sample.problems) unless sample.stale?
         job.next_time = sample.next_time if sample.mistimed?
       rescue Overnight::Error => e
         warn e.message
@@ -41,6 +42,12 @@ module Overnight
       keys = %i[entry device_status status treatment]
       values = @nightscout.get.fetch_values(*keys)
       Nightscout::Sample.new(time, *values)
+    end
+
+    def warn_listeners(problems)
+      # print all warnings to $stdout before posting (which might raise an error)
+      problems.each { puts "Warning: #{it}" }
+      problems.each { Pushover.post(it) } # rubocop:disable Style/CombinableLoops
     end
   end
 end
