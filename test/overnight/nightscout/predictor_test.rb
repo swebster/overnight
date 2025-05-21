@@ -5,7 +5,6 @@ require 'overnight/nightscout/predictor'
 
 Constants  = Overnight::Nightscout::Constants
 Entry      = Overnight::Nightscout::Entry
-Error      = Overnight::Nightscout::Error
 EntryRange = Overnight::Nightscout::EntryRange
 Predictor  = Overnight::Nightscout::Predictor
 
@@ -24,7 +23,7 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   }.freeze
 
   def test_empty_raises_error
-    error = assert_raises(Error) { create_predictor([]) }
+    error = assert_raises(Overnight::Error) { create_predictor([]) }
     assert_equal 'No glucose entries provided', error.message
   end
 
