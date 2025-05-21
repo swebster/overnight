@@ -2,7 +2,7 @@
 
 require 'json'
 require 'typhoeus'
-require 'overnight/nightscout/error'
+require 'overnight/error'
 require 'overnight/nightscout/url'
 
 module Overnight

@@ -2,7 +2,6 @@
 
 require 'overnight/nightscout/constants'
 require 'overnight/nightscout/entry'
-require 'overnight/nightscout/error'
 require 'overnight/nightscout/printer'
 
 module Overnight
