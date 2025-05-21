@@ -29,11 +29,12 @@ module Overnight
       def print_row # rubocop:disable Metrics/AbcSize
         entries = [latest_entry] + predicted_entries(12).minmax
         local_date = Printer.format_date_time(@synchronizer.request_time)
-        times = Printer.format_times([@status, entries.first].map(&:time))
-        glucose_values = entries.map { format_glucose(it) }.join(' ')
+        status_time = Printer.format_time(@status.time)
+        entry_time = format_time(entries.first)
+        glucose = entries.map { format_glucose(it) }.join(' ')
         iob = Printer.format_iob(loop.iob)
         cob = Printer.format_cob(loop.cob)
-        puts "#{local_date} #{times} #{glucose_values} #{iob} #{cob}"
+        puts "#{local_date} #{status_time} #{entry_time} #{glucose} #{iob} #{cob}"
       end
 
       def print_transitions
@@ -66,6 +67,15 @@ module Overnight
 
       def format_glucose(entry)
         Printer.format_glucose(entry.glucose, categorize(entry), fixed_width: true)
+      end
+
+      def format_time(entry)
+        time = Printer.format_time(entry.time)
+        case @synchronizer.missed_samples
+        when 0    then time
+        when 1..5 then Printer.format_warning(time)
+        when 6..  then Printer.format_error(time)
+        end
       end
 
       def latest_entry

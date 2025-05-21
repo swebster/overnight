@@ -19,16 +19,20 @@ module Overnight
         Rainbow.uncolor(string)
       end
 
+      def format_warning(string)
+        Rainbow(string).yellow
+      end
+
+      def format_error(string)
+        Rainbow(string).red
+      end
+
       def format_date_time(time)
         time.localtime.strftime('%F %T')
       end
 
       def format_time(time)
         time.localtime.strftime('%T')
-      end
-
-      def format_times(times)
-        times.map { format_time(it) }.join(' ')
       end
 
       def format_glucose(glucose, range, fixed_width: false)
