@@ -49,7 +49,7 @@ module Overnight
 
       problems.each { puts "Warning: #{it}" }
       message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
-      Pushover.post(message)
+      Pushover.post(message, title: 'Warning')
     end
   end
 end

@@ -6,7 +6,7 @@ require 'json'
 require 'overnight/pushover'
 
 begin
-  response_body = Overnight::Pushover.post('Initial test')
+  response_body = Overnight::Pushover.post('Initial test', title: 'Test')
   puts JSON.pretty_generate(JSON.parse(response_body))
 rescue Overnight::Error => e
   warn e.message

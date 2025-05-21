@@ -8,9 +8,9 @@ module Overnight
   module Pushover
     extend HTTPClient
 
-    def self.post(message)
+    def self.post(message, title:)
       url = 'https://api.pushover.net/1/messages.json'
-      params = { token: APP_TOKEN, user: USER_KEY, title: 'Test', message: }
+      params = { token: APP_TOKEN, user: USER_KEY, title:, message: }
       request = Typhoeus::Request.new(url, method: :post, params:)
       request.run.tap { |response| validate_http(response) }.body
     end
