@@ -54,7 +54,7 @@ module Overnight
       end
 
       def exceeds_duration?(entry_ranges, max_duration)
-        entry_ranges.sum { it.duration } > max_duration
+        entry_ranges.sum(&:duration) > max_duration
       end
 
       def problematic?(entry_ranges, notice_period, max_duration)
@@ -101,7 +101,7 @@ module Overnight
         if type == :urgent
           entry_ranges.first.duration
         else
-          entry_ranges.sum { it.duration }
+          entry_ranges.sum(&:duration)
         end
       end
 
