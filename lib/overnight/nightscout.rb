@@ -2,6 +2,7 @@
 
 require 'overnight/nightscout/authorization'
 require 'overnight/nightscout/sample'
+require 'overnight/options'
 require 'overnight/utils'
 
 module Overnight
