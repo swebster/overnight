@@ -31,8 +31,9 @@ module Overnight
         time.localtime.strftime('%F %T')
       end
 
-      def format_time(time)
-        time.localtime.strftime('%T')
+      def format_time(time, with_seconds: true)
+        format_string = with_seconds ? '%T' : '%H:%M'
+        time.localtime.strftime(format_string)
       end
 
       def format_glucose(glucose, range, fixed_width: false)

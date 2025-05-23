@@ -83,15 +83,15 @@ module Overnight
       end
 
       def format_problem(entry_ranges, problem, type)
-        time = format_time(entry_ranges, type)
+        time = format_time(entry_ranges.first, type)
         duration = (get_duration(entry_ranges, type) / 60).round
         min_max = format_min_max(entry_ranges, problem)
         "#{type.capitalize} #{problem} #{time} #{duration} minutes, #{min_max}"
       end
 
-      def format_time(entry_ranges, type)
+      def format_time(entry, type)
         if type == :predicted
-          "at #{Printer.format_time(entry_ranges.first.time)} for"
+          "at #{Printer.format_time(entry.time, with_seconds: false)} for"
         else
           'for next'
         end
@@ -117,7 +117,7 @@ module Overnight
 
       def format_glucose_time(entry, range)
         glucose = Printer.format_glucose(entry.glucose, range)
-        time = Printer.format_time(entry.time)
+        time = Printer.format_time(entry.time, with_seconds: false)
         "#{glucose} by #{time}"
       end
 
