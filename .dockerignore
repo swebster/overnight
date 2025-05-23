@@ -1,0 +1,12 @@
+.bundle/
+.git/
+.ruby-lsp/
+bin/pushover
+test/
+vendor/
+.env
+.dockerignore
+.gitignore
+.rubocop.yml
+Dockerfile
+Rakefile
