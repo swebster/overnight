@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'rufus-scheduler', '~> 3.9'
   s.add_dependency 'typhoeus', '~> 1.4'
 
+  s.add_development_dependency 'climate_control', '~> 1.2'
   s.add_development_dependency 'minitest', '~> 5.25'
   s.add_development_dependency 'rubocop', '~> 1.75'
   s.add_development_dependency 'ruby-lsp', '~> 0.23'
