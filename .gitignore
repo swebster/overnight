@@ -1,4 +1,5 @@
 /.env.local
+/.env.secrets
 /.bundle/
 /test/overnight/nightscout/data/
 /vendor/
