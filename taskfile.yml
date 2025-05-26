@@ -1,5 +1,8 @@
 version: '3'
 
+vars:
+  IMAGE_NAME: swebster/overnight
+
 run: when_changed
 
 tasks:
@@ -15,7 +18,6 @@ tasks:
 
   config:secrets:
     desc: Create a config file for sensitive data
-    deps: [config:local]
     cmds:
       - ./configure_secrets.sh
     interactive: true
@@ -23,3 +25,22 @@ tasks:
       - configure_secrets.sh
     generates:
       - .env.secrets
+
+  podman:build:
+    vars:
+      IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
+      TARGET: 'localhost/{{.IMAGE_NAME}}:latest'
+    cmds:
+      - podman build . -t {{.IMAGE_NAME}}
+    sources:
+      - Gemfile*
+      - bin/overnight
+      - lib/**/*.rb
+      - overnight.gemspec
+    status:
+      - podman images --filter dangling=false --format {{.IMAGE_FORMAT}} | grep -qx {{.TARGET}}
+
+  podman:run:
+    deps: [config:local, config:secrets, podman:build]
+    cmds:
+      - podman run -it --rm --env-file .env.local --env-file .env.secrets {{.IMAGE_NAME}}
