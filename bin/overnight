@@ -47,19 +47,29 @@ module Overnight
 
     def report_problems(sample)
       if sample.missed_samples.zero?
-        warn_listeners(sample.problems)
+        warn_listeners(sample.problems, messages_per_hour: 2)
       # Dexcom warns every 30 minutes, so warn after 15 and every 30 after that
       elsif ((sample.missed_samples + 3) % 6).zero?
-        warn_listeners("No data for the last #{sample.delay / 60} minutes")
+        message = "No data for the last #{sample.delay / 60} minutes"
+        warn_listeners(message, messages_per_hour: 4)
       end
     end
 
-    def warn_listeners(problems)
+    def warn_listeners(problems, messages_per_hour:)
       return if problems.empty?
 
       problems.each { puts "Warning: #{it}" } # ignore silent mode for warnings
       message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
+      post_warning(message, messages_per_hour)
+    end
+
+    def post_warning(message, messages_per_hour)
+      interval = @last_posted.nil? ? 30 : (Time.now - @last_posted).floor / 60
+      max_interval = (60 / messages_per_hour.clamp(2..6)) - 1
+      return if interval < max_interval
+
       Pushover.post(message, title: 'Warning')
+      @last_posted = Time.now
     end
   end
 end
