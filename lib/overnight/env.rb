@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-require 'dotenv/load'
+require 'dotenv'
 require 'overnight/error'
+
+Dotenv.load('.env.local', '.env.secrets')
 
 module Overnight
   # provides methods to fetch container secrets from the environment
