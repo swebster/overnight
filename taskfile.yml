@@ -1,0 +1,25 @@
+version: '3'
+
+run: when_changed
+
+tasks:
+  config:local:
+    desc: Create a config file for custom settings
+    cmds:
+      - ./configure_local.sh
+    interactive: true
+    sources:
+      - configure_local.sh
+    generates:
+      - .env.local
+
+  config:secrets:
+    desc: Create a config file for sensitive data
+    deps: [config:local]
+    cmds:
+      - ./configure_secrets.sh
+    interactive: true
+    sources:
+      - configure_secrets.sh
+    generates:
+      - .env.secrets

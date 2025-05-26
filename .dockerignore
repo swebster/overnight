@@ -1,12 +1,15 @@
 .bundle/
 .git/
 .ruby-lsp/
+.task/
 bin/pushover
 test/
 vendor/
-.env
+.env.*
 .dockerignore
 .gitignore
 .rubocop.yml
+configure_*.sh
 Dockerfile
 Rakefile
+taskfile.yml

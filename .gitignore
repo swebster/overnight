@@ -1,5 +1,6 @@
 /.env.local
 /.env.secrets
 /.bundle/
+/.task/
 /test/overnight/nightscout/data/
 /vendor/
