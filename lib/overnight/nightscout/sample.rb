@@ -11,7 +11,7 @@ module Overnight
     # aggregates salient data from Nightscout for display and analysis
     class Sample
       extend Forwardable
-      def_delegators :@synchronizer, :mistimed?, :next_time
+      def_delegators :@synchronizer, :mistimed?, :missed_samples, :next_time
 
       def self.print_column_headers
         columns = %w[LocalDate Time NsTime BgTime BG Min Max IOB COB]
@@ -46,8 +46,9 @@ module Overnight
         Predictor.new(entry_ranges, @treatments).problems
       end
 
-      def stale?
-        @synchronizer.missed_samples.positive?
+      # number of seconds since Nightscout last received data from Loop
+      def delay
+        (@synchronizer.missed_samples * Constants::LOOP_INTERVAL).floor
       end
 
       private

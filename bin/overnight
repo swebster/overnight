@@ -20,7 +20,7 @@ module Overnight
       @scheduler.every(interval, first: :now) do |job|
         sample = fetch_sample
         sample.print_row unless @silent
-        warn_listeners(sample.problems) unless sample.stale?
+        report_problems(sample)
         job.next_time = sample.next_time if sample.mistimed?
       rescue Overnight::Error => e
         warn e.message
@@ -43,6 +43,15 @@ module Overnight
       keys = %i[entry device_status status treatment]
       values = @nightscout.get.fetch_values(*keys)
       Nightscout::Sample.new(time, *values)
+    end
+
+    def report_problems(sample)
+      if sample.missed_samples.zero?
+        warn_listeners(sample.problems)
+      # Dexcom warns every 30 minutes, so warn after 15 and every 30 after that
+      elsif ((sample.missed_samples + 3) % 6).zero?
+        warn_listeners("No data for the last #{sample.delay / 60} minutes")
+      end
     end
 
     def warn_listeners(problems)
