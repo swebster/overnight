@@ -27,6 +27,7 @@ tasks:
       - .env.secrets
 
   podman:build:
+    desc: Build the relevant container image
     vars:
       IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
       TARGET: 'localhost/{{.IMAGE_NAME}}:latest'
@@ -40,7 +41,34 @@ tasks:
     status:
       - podman images --filter dangling=false --format {{.IMAGE_FORMAT}} | grep -qx {{.TARGET}}
 
-  podman:run:
-    deps: [config:local, config:secrets, podman:build]
+  podman:secrets:
+    desc: Store sensitive config data appropriately
+    deps: [config:secrets]
+    vars:
+      MISSING_SECRETS:
+        sh: >
+          awk -F= '{print tolower($1)}' .env.secrets.template |
+            xargs -I{} sh -c 'podman secret exists {} || printf "%s\n" {}'
     cmds:
-      - podman run -it --rm --env-file .env.local --env-file .env.secrets {{.IMAGE_NAME}}
+      - for: { var: MISSING_SECRETS }
+        cmd: >
+          grep -iq {{.ITEM}} .env.secrets &&
+          awk -F= '$1 == "{{upper .ITEM}}" {printf("%s", $2)}' .env.secrets |
+            podman secret create {{.ITEM}} -
+    status:
+      - test {{len .MISSING_SECRETS}} -eq 0
+
+  podman:run:
+    desc: Run overnight in a container
+    deps: [config:local, podman:secrets, podman:build]
+    vars:
+      SECRET_OPTS: uid=101,gid=101,mode=0400
+      SECRET_ARGS:
+        sh: >
+          secrets=($(awk -F= '{print tolower($1)}' .env.secrets.template));
+          for secret in "${secrets[@]}"; do
+            SECRET=$(echo "$secret" | awk '{print toupper($0)}');
+            printf "--env ${SECRET}_FILE=/run/secrets/$secret --secret $secret,{{.SECRET_OPTS}} ";
+          done
+    cmds:
+      - podman run -it --rm --env-file .env.local {{.SECRET_ARGS}}{{.IMAGE_NAME}} {{.CLI_ARGS}}
