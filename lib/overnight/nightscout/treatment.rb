@@ -17,6 +17,12 @@ module Overnight
 
       CorrectionBolus = Data.define(:timestamp, :insulin)
 
+      SensorStart = Data.define(:timestamp, :notes) do
+        def sensor_id
+          /^SensorID:\s+(\S+)$/.match(notes).captures.first
+        end
+      end
+
       SuspendPump = Data.define(:timestamp)
 
       def self.request(token:, count: 12)

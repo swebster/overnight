@@ -10,6 +10,7 @@ module Overnight
         'Temp Basal',
         'Carb Correction',
         'Correction Bolus',
+        'Sensor Start',
         'Suspend Pump'
       ].freeze
 
@@ -49,6 +50,18 @@ module Overnight
         json(TimedEventSchema) do
           required(:insulin).filled { (int? | float?) & gteq?(0) }
         end
+      end
+
+      class SensorStartContract < Dry::Validation::Contract
+        register_macro(:sensor_id) do
+          key.failure('SensorID is missing') unless /^SensorID:\s+\S+$/.match?(value)
+        end
+
+        json(TimedEventSchema) do
+          required(:notes).filled(:string)
+        end
+
+        rule(:notes).validate(:sensor_id)
       end
 
       class SuspendPumpContract < Dry::Validation::Contract
