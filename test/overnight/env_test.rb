@@ -53,7 +53,7 @@ class TestEnv < Minitest::Test
 
   def test_load_missing_secret
     assert_equal false, ENV.key?(REQUIRED_SECRET_FILE)
-    error = assert_raises(Error) { Env.load_secret(key: REQUIRED_SECRET) }
+    error = assert_raises(Error) { Env.load_secret(REQUIRED_SECRET) }
     assert_match(/\b#{REQUIRED_SECRET_FILE}\b/, error.message)
   end
 
@@ -61,7 +61,7 @@ class TestEnv < Minitest::Test
     secret_path = 'some_path'
     ClimateControl.modify({ REQUIRED_SECRET_FILE => secret_path }) do
       assert_equal true, ENV.key?(REQUIRED_SECRET_FILE)
-      error = assert_raises(Error) { Env.load_secret(key: REQUIRED_SECRET) }
+      error = assert_raises(Error) { Env.load_secret(REQUIRED_SECRET) }
       assert_match(/\b#{REQUIRED_SECRET_FILE}\b/, error.message)
       assert_match(/\b#{secret_path}\b/, error.message)
     end
@@ -74,7 +74,7 @@ class TestEnv < Minitest::Test
       secret_file.close
       ClimateControl.modify({ REQUIRED_SECRET_FILE => secret_file.path }) do
         assert_equal true, ENV.key?(REQUIRED_SECRET_FILE)
-        assert_equal secret_value, Env.load_secret(key: REQUIRED_SECRET)
+        assert_equal secret_value, Env.load_secret(REQUIRED_SECRET)
       end
     end
   end

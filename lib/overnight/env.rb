@@ -13,7 +13,7 @@ module Overnight
       Dotenv.require_keys(keys + missing_secrets.map { it[0, it.length - 5] })
     end
 
-    def self.load_secret(key:)
+    def self.load_secret(key)
       secret_key = "#{key}_FILE"
       raise Error, "#{secret_key} is not defined" unless ENV.key?(secret_key)
 
