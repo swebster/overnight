@@ -23,6 +23,8 @@ module Overnight
         end
       end
 
+      SiteChange = Data.define(:timestamp, :notes)
+
       SuspendPump = Data.define(:timestamp)
 
       def self.request(token:, count: 12)

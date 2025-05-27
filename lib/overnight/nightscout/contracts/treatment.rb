@@ -11,6 +11,7 @@ module Overnight
         'Carb Correction',
         'Correction Bolus',
         'Sensor Start',
+        'Site Change',
         'Suspend Pump'
       ].freeze
 
@@ -62,6 +63,12 @@ module Overnight
         end
 
         rule(:notes).validate(:sensor_id)
+      end
+
+      class SiteChangeContract < Dry::Validation::Contract
+        json(TimedEventSchema) do
+          required(:notes).filled(:string)
+        end
       end
 
       class SuspendPumpContract < Dry::Validation::Contract
