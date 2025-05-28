@@ -1,7 +1,10 @@
 version: '3'
 
 vars:
-  IMAGE_NAME: swebster/overnight
+  OVERNIGHT: swebster/overnight
+  PODLET: ghcr.io/containers/podlet:v0.3.0
+  IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
+  IMAGE_OPTIONS: --filter dangling=false --format {{.IMAGE_FORMAT}}
 
 run: when_changed
 
@@ -29,17 +32,16 @@ tasks:
   podman:build:
     desc: Build the relevant container image
     vars:
-      IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
-      TARGET: 'localhost/{{.IMAGE_NAME}}:latest'
+      TARGET: 'localhost/{{.OVERNIGHT}}:latest'
     cmds:
-      - podman build . -t {{.IMAGE_NAME}}
+      - podman build . -t {{.OVERNIGHT}}
     sources:
       - Gemfile*
       - bin/overnight
       - lib/**/*.rb
       - overnight.gemspec
     status:
-      - podman images --filter dangling=false --format {{.IMAGE_FORMAT}} | grep -qx {{.TARGET}}
+      - podman images {{.IMAGE_OPTIONS}} | grep -qx {{.TARGET}}
 
   podman:secrets:
     desc: Store sensitive config data appropriately
@@ -62,13 +64,34 @@ tasks:
     desc: Run overnight in a container
     deps: [config:local, podman:secrets, podman:build]
     vars:
-      SECRET_OPTS: uid=101,gid=101,mode=0400
-      SECRET_ARGS:
-        sh: >
-          secrets=($(awk -F= '{print tolower($1)}' .env.secrets.template));
-          for secret in "${secrets[@]}"; do
-            SECRET=$(echo "$secret" | awk '{print toupper($0)}');
-            printf "--env ${SECRET}_FILE=/run/secrets/$secret --secret $secret,{{.SECRET_OPTS}} ";
-          done
+      ENV_OPTIONS:
+        sh: ./extract_env.sh
+      TARGET: 'localhost/{{.OVERNIGHT}}:latest'
     cmds:
-      - podman run -it --rm --env-file .env.local {{.SECRET_ARGS}}{{.IMAGE_NAME}} {{.CLI_ARGS}}
+      - podman run -it --rm {{.ENV_OPTIONS}} {{.OVERNIGHT}} {{.CLI_ARGS}}
+    status:
+      - podman ps --format '{{`{{.Image}}`}}' | grep -qx {{.TARGET}}
+
+  podlet:pull:
+    desc: Pull a container image for running podlet
+    cmds:
+      - podman pull {{.PODLET}}
+    status:
+      - podman images {{.IMAGE_OPTIONS}} | grep -qx {{.PODLET}}
+
+  podlet:run:
+    desc: Generate configuration to run overnight as a systemd service
+    deps: [config:local, podlet:pull]
+    vars:
+      ENV_OPTIONS:
+        sh: ./extract_env.sh
+    cmds:
+      - |
+        podman run --rm {{.PODLET}} --install \
+          podman run --restart=always {{.ENV_OPTIONS}} {{.OVERNIGHT}} |
+          grep -v '^#' > overnight.container
+    sources:
+      - .env.local
+      - extract_env.sh
+    generates:
+      - overnight.container

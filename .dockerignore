@@ -5,11 +5,12 @@
 bin/pushover
 test/
 vendor/
-.env.*
 .dockerignore
+.env.*
 .gitignore
 .rubocop.yml
-configure_*.sh
+*.sh
 Dockerfile
 Rakefile
+overnight.container
 taskfile.yml
