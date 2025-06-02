@@ -9,7 +9,7 @@ vendor/
 .env.*
 .gitignore
 .rubocop.yml
-*.sh
 Dockerfile
 Rakefile
+configure_*.sh
 taskfile.yml

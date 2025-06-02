@@ -35,12 +35,12 @@ tasks:
     desc: Generate common 'podman run' options
     deps: [config:local]
     cmds:
-      - ./extract_env.sh
+      - ./configure_podman.sh
     interactive: true
     sources:
       - .env.local
       - .env.secrets.template
-      - extract_env.sh
+      - configure_podman.sh
     generates:
       - '{{.PODMAN_OPTIONS_FILE}}'
 
