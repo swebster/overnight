@@ -106,9 +106,11 @@ tasks:
     vars:
       RUN_OPTIONS:
         sh: paste -s -d ' ' {{.PODMAN_OPTIONS_FILE}}
+      ADDED_HOSTS:
+        sh: grep -x -- '--add-host .*:host-gateway' {{.PODMAN_OPTIONS_FILE}} | wc -l
+      SERVICE_OPTIONS: '{{if ge (atoi .ADDED_HOSTS) 1}}{{"--requires caddy --after caddy"}}{{end}}'
     cmds:
-      - |
-        podman run --rm {{.PODLET}} --install \
+      - podman run --rm {{.PODLET}} {{.SERVICE_OPTIONS}} --install
           podman run --restart=always {{.RUN_OPTIONS}} {{.OVERNIGHT}} |
           grep -v '^#' > {{.SERVICE_CONFIG_FILE}}
     sources:
