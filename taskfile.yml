@@ -5,6 +5,8 @@ vars:
   PODLET: ghcr.io/containers/podlet:v0.3.0
   IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
   IMAGE_OPTIONS: --filter dangling=false --format {{.IMAGE_FORMAT}}
+  PODMAN_OPTIONS_FILE: .task/podman_run.options
+  SERVICE_CONFIG_FILE: .task/overnight.container
 
 run: when_changed
 
@@ -28,6 +30,19 @@ tasks:
       - configure_secrets.sh
     generates:
       - .env.secrets
+
+  config:podman:
+    desc: Generate common 'podman run' options
+    deps: [config:local]
+    cmds:
+      - ./extract_env.sh
+    interactive: true
+    sources:
+      - .env.local
+      - .env.secrets.template
+      - extract_env.sh
+    generates:
+      - '{{.PODMAN_OPTIONS_FILE}}'
 
   podman:build:
     desc: Build the relevant container image
@@ -60,38 +75,49 @@ tasks:
     status:
       - test {{len .MISSING_SECRETS}} -eq 0
 
-  podman:run:
-    desc: Run overnight in a container
-    deps: [config:local, podman:secrets, podman:build]
+  podman:run:internal:
+    deps: [podman:secrets, podman:build]
     vars:
-      ENV_OPTIONS:
-        sh: ./extract_env.sh
+      RUN_OPTIONS:
+        sh: paste -s -d ' ' {{.PODMAN_OPTIONS_FILE}}
       TARGET: 'localhost/{{.OVERNIGHT}}:latest'
     cmds:
-      - podman run -it --rm {{.ENV_OPTIONS}} {{.OVERNIGHT}} {{.CLI_ARGS}}
+      - podman run -it --rm {{.RUN_OPTIONS}} {{.OVERNIGHT}} {{.CLI_ARGS}}
     status:
       - podman ps --format '{{`{{.Image}}`}}' | grep -qx {{.TARGET}}
 
+  podman:run:
+    desc: Run overnight in a container
+    deps: [config:podman]
+    cmds:
+      - task: podman:run:internal
+
   podlet:pull:
     desc: Pull a container image for running podlet
+    internal: true
     cmds:
       - podman pull {{.PODLET}}
     status:
       - podman images {{.IMAGE_OPTIONS}} | grep -qx {{.PODLET}}
 
-  podlet:run:
-    desc: Generate configuration to run overnight as a systemd service
-    deps: [config:local, podlet:pull]
+  podlet:run:internal:
+    internal: true
+    deps: [podlet:pull]
     vars:
-      ENV_OPTIONS:
-        sh: ./extract_env.sh
+      RUN_OPTIONS:
+        sh: paste -s -d ' ' {{.PODMAN_OPTIONS_FILE}}
     cmds:
       - |
         podman run --rm {{.PODLET}} --install \
-          podman run --restart=always {{.ENV_OPTIONS}} {{.OVERNIGHT}} |
-          grep -v '^#' > overnight.container
+          podman run --restart=always {{.RUN_OPTIONS}} {{.OVERNIGHT}} |
+          grep -v '^#' > {{.SERVICE_CONFIG_FILE}}
     sources:
-      - .env.local
-      - extract_env.sh
+      - '{{.PODMAN_OPTIONS_FILE}}'
     generates:
-      - overnight.container
+      - '{{.SERVICE_CONFIG_FILE}}'
+
+  podlet:run:
+    desc: Generate configuration to run overnight as a systemd service
+    deps: [config:podman]
+    cmds:
+      - task: podlet:run:internal

@@ -4,20 +4,66 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 readonly ENV_LOCAL="${SCRIPT_DIR}/.env.local"
 readonly SECRETS_TEMPLATE="${SCRIPT_DIR}/.env.secrets.template"
 readonly SECRET_OPTS='uid=101,gid=101,mode=0400'
+readonly PODMAN_MIN_VER=5.3
+readonly PODMAN_OPTIONS_FILE="${SCRIPT_DIR}/.task/podman_run.options"
+readonly PODMAN_OPTIONS_TMP="${PODMAN_OPTIONS_FILE%.options}.tmp"
+trap 'rm -f ${PODMAN_OPTIONS_TMP}' EXIT
 
-function set_local() {
-  if [[ -f "${ENV_LOCAL}" ]]; then
-    sed -e 's/^/--env /g' "${ENV_LOCAL}"
+function supports_host_gateway() {
+  local -r podman_version=$(podman --version | \
+    sed -E 's/podman version ([0-9]+\.[0-9]+).*/\1/')
+
+  # check that this version is greater than the minimum supported version
+  printf '%s\n' $PODMAN_MIN_VER "$podman_version" | sort -C -V
+}
+
+function service_exists () {
+  systemctl --user list-unit-files "$1.service" &>/dev/null
+}
+
+function add_host_gateway () {
+  read -rp 'Are you installing this service on your Nightscout server? [y/N] ' response
+  response=${response,,} # to lowercase
+  if [[ "$response" =~ ^(yes|y)$ ]]; then
+    if ! supports_host_gateway; then
+      # refer to https://github.com/eriksjolund/podman-networking-docs for alternatives
+      printf >&2 "Please upgrade podman to at least version %s before you continue.\n" \
+        $PODMAN_MIN_VER
+      exit 1
+    fi
+
+    if ! service_exists 'nightscout' || ! service_exists 'caddy'; then
+      printf >&2 'Please install Nightscout (and caddy) before you continue.\n'
+      exit 1
+    fi
+
+    NIGHTSCOUT_HOST="$(sed -n 's/^NIGHTSCOUT_HOST=//p' .env.local)"
+    printf -- "--add-host %s:host-gateway\n" "$NIGHTSCOUT_HOST"
   fi
 }
 
+function set_local() {
+  sed -e '/^$/D;s/^/--env /g' "$ENV_LOCAL"
+}
+
 function add_secrets() {
-  local -r secrets=($(awk -F= '{print tolower($1)}' "${SECRETS_TEMPLATE}"))
-  for secret in "${secrets[@]}"; do
+  mapfile -t secret_names < <(awk -F= 'NF {print tolower($1)}' "$SECRETS_TEMPLATE")
+  for secret in "${secret_names[@]}"; do
     SECRET=$(echo "$secret" | awk '{print toupper($0)}')
-    printf -- "--env ${SECRET}_FILE=/run/secrets/$secret --secret $secret,$SECRET_OPTS\n"
+
+    printf -- "--env %s_FILE=/run/secrets/%s --secret %s,%s\n" \
+      "$SECRET" "$secret" "$secret" $SECRET_OPTS
   done
 }
 
-# convert local and secret env vars into 'podman run' options
-{ set_local; add_secrets; } | paste -s -d ' '
+if [[ ! -f "$ENV_LOCAL" ]]; then
+  printf "%s does not exist. Please generate it then try again.\n" "$ENV_LOCAL"
+  exit 1
+fi
+
+# determine the relevant 'podman run' options and write them to a file
+add_host_gateway > "$PODMAN_OPTIONS_TMP"
+set_local       >> "$PODMAN_OPTIONS_TMP"
+add_secrets     >> "$PODMAN_OPTIONS_TMP"
+
+mv -f "$PODMAN_OPTIONS_TMP" "$PODMAN_OPTIONS_FILE"

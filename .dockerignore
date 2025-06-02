@@ -12,5 +12,4 @@ vendor/
 *.sh
 Dockerfile
 Rakefile
-overnight.container
 taskfile.yml
