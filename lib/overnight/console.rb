@@ -1,7 +1,5 @@
-#!/usr/bin/env ruby
 # frozen_string_literal: true
 
-require 'bundler/setup'
 require 'overnight/nightscout'
 require 'overnight/pushover'
 require 'rufus-scheduler'
@@ -73,21 +71,3 @@ module Overnight
     end
   end
 end
-
-# handle interrupts as a normal way to terminate the process
-Signal.trap('INT') do
-  puts "\rInterrupted"
-  exit
-end
-
-# handle termination signals (e.g. from systemd) the same way
-Signal.trap('TERM') do
-  puts 'Terminated'
-  exit
-end
-
-console = Overnight::Console.new(**Overnight::Options.parse)
-puts "Monitoring #{Overnight::Nightscout::HOST}..."
-at_exit { console.stop_sampling }
-console.sample_every('5m')
-console.start_sampling
