@@ -7,6 +7,8 @@ vars:
   IMAGE_OPTIONS: --filter dangling=false --format {{.IMAGE_FORMAT}}
   PODMAN_OPTIONS_FILE: .task/podman_run.options
   SERVICE_CONFIG_FILE: .task/overnight.container
+  QUADLET_DIR: '{{.XDG_CONFIG_HOME | default (printf "%s/.config" .HOME)}}/containers/systemd'
+  INSTALLED_SERVICE_FILE: '{{.QUADLET_DIR}}/{{base .SERVICE_CONFIG_FILE}}'
 
 run: when_changed
 
@@ -123,3 +125,25 @@ tasks:
     deps: [config:podman]
     cmds:
       - task: podlet:run:internal
+
+  service:install:
+    desc: Registers and starts overnight as a systemd service
+    deps: [podman:secrets, podman:build, podlet:run]
+    cmds:
+      - mkdir -p {{.QUADLET_DIR}}
+      - cp {{.SERVICE_CONFIG_FILE}} '{{.QUADLET_DIR}}/'
+      - systemctl --user daemon-reload
+      - systemctl --user start overnight
+    sources:
+      - '{{.SERVICE_CONFIG_FILE}}'
+    generates:
+      - '{{.INSTALLED_SERVICE_FILE}}'
+
+  service:uninstall:
+    desc: Stops and unregisters overnight as a systemd service
+    cmds:
+      - systemctl --user stop overnight
+      - rm -f {{.INSTALLED_SERVICE_FILE}}
+      - systemctl --user daemon-reload
+    status:
+      - test ! -f {{.INSTALLED_SERVICE_FILE}}
