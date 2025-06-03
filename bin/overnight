@@ -51,7 +51,7 @@ module Overnight
       # Dexcom warns every 30 minutes, so warn after 15 and every 30 after that
       elsif ((sample.missed_samples + 3) % 6).zero?
         message = "No data for the last #{sample.delay / 60} minutes"
-        warn_listeners(message, messages_per_hour: 4)
+        warn_listeners([message], messages_per_hour: 4)
       end
     end
 
@@ -64,9 +64,9 @@ module Overnight
     end
 
     def post_warning(message, messages_per_hour)
-      interval = @last_posted.nil? ? 30 : (Time.now - @last_posted).floor / 60
-      max_interval = (60 / messages_per_hour.clamp(2..6)) - 1
-      return if interval < max_interval
+      interval = @last_posted.nil? ? nil : (Time.now - @last_posted).floor / 60
+      min_interval = (60 / messages_per_hour.clamp(2..6)) - 1
+      return if !interval.nil? && interval < min_interval
 
       Pushover.post(message, title: 'Warning')
       @last_posted = Time.now
