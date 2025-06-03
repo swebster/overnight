@@ -42,16 +42,17 @@ function add_host_gateway () {
   fi
 }
 
-function set_local() {
-  sed -e '/^$/D;s/^/--env /g' "$ENV_LOCAL"
+function name_container() {
+  echo '--name overnight'
 }
 
-function add_secrets() {
-  mapfile -t secret_names < <(awk -F= 'NF {print tolower($1)}' "$SECRETS_TEMPLATE")
-  for secret in "${secret_names[@]}"; do
-    SECRET=$(echo "$secret" | awk '{print toupper($0)}')
+function set_environment() {
+  sed -e '/^$/D;s/^/--env /g' "$ENV_LOCAL"
+  mapfile -t secret_names < <(cut -d= -f1 "$SECRETS_TEMPLATE")
+  for SECRET in "${secret_names[@]}"; do
+    secret=$(echo "$SECRET" | awk '{print tolower($0)}')
 
-    printf -- "--env %s_FILE=/run/secrets/%s --secret %s,%s\n" \
+    printf -- "--env %s_FILE=/run/secrets/%s\n--secret %s,%s\n" \
       "$SECRET" "$secret" "$secret" $SECRET_OPTS
   done
 }
@@ -63,7 +64,7 @@ fi
 
 # determine the relevant 'podman run' options and write them to a file
 add_host_gateway > "$PODMAN_OPTIONS_TMP"
-set_local       >> "$PODMAN_OPTIONS_TMP"
-add_secrets     >> "$PODMAN_OPTIONS_TMP"
+name_container  >> "$PODMAN_OPTIONS_TMP"
+set_environment >> "$PODMAN_OPTIONS_TMP"
 
-mv -f "$PODMAN_OPTIONS_TMP" "$PODMAN_OPTIONS_FILE"
+sort "$PODMAN_OPTIONS_TMP" > "$PODMAN_OPTIONS_FILE"
