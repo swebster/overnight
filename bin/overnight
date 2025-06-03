@@ -3,6 +3,7 @@
 
 require 'bundler/setup'
 require 'overnight/console'
+require 'overnight/options'
 
 # handle interrupts as a normal way to terminate the process
 Signal.trap('INT') do
