@@ -74,9 +74,15 @@ module Overnight
   end
 end
 
-# handle interrupts as the normal way to terminate the process
+# handle interrupts as a normal way to terminate the process
 Signal.trap('INT') do
   puts "\rInterrupted"
+  exit
+end
+
+# handle termination signals (e.g. from systemd) the same way
+Signal.trap('TERM') do
+  puts 'Terminated'
   exit
 end
 
