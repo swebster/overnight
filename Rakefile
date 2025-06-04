@@ -14,6 +14,7 @@ SAMPLE_DIR = 'test/overnight/nightscout/data'
 directory SAMPLE_DIR
 CLEAN << SAMPLE_DIR
 
+desc 'Get data from NIGHTSCOUT_HOST for integration tests'
 task sample_data: SAMPLE_DIR do
   sources = FileList['lib/overnight/nightscout/contracts/*.rb']
   filenames = sources.exclude('**/authorization.rb').map { it.pathmap('%n') }
