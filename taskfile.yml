@@ -53,6 +53,7 @@ tasks:
     cmds:
       - podman build . -t {{.OVERNIGHT}}
     sources:
+      - Dockerfile
       - Gemfile*
       - bin/overnight
       - lib/**/*.rb
