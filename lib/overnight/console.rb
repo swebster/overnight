@@ -56,7 +56,7 @@ module Overnight
     def warn_listeners(problems, messages_per_hour:)
       return if problems.empty?
 
-      problems.each { puts "Warning: #{it}" } # ignore silent mode for warnings
+      problems.each { warn "Warning: #{it}" } # always log warnings to stderr
       message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
       post_warning(message, messages_per_hour)
     end
