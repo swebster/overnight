@@ -2,7 +2,9 @@
 
 FROM ruby:3.4.4-alpine AS base
 
-RUN apk --no-cache add libcurl tzdata && \
+RUN apk --no-cache add jemalloc libcurl patchelf tzdata && \
+    patchelf --add-needed libjemalloc.so.2 /usr/local/bin/ruby && \
+    apk del patchelf && \
     addgroup -g 101 -S ruby && \
     adduser  -u 101 -S overnight -g overnight -G ruby -H && \
     mkdir -p /usr/src/app/lib/overnight && \
