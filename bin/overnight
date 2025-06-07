@@ -20,5 +20,6 @@ end
 console = Overnight::Console.new(**Overnight::Options.parse)
 puts "Monitoring #{Overnight::Nightscout::HOST}..."
 at_exit { console.stop_sampling }
+RubyVM::YJIT.enable if Module.const_defined?('RubyVM::YJIT')
 console.sample_every('5m')
 console.start_sampling
