@@ -31,4 +31,4 @@ COPY --chown=overnight . .
 
 USER overnight
 
-CMD ["bin/overnight", "--silent"]
+CMD ["bin/overnight", "--push-notifications"]

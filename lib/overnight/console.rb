@@ -7,17 +7,18 @@ require 'rufus-scheduler'
 module Overnight
   # controls periodic sampling of Nightscout data and output to the terminal
   class Console
-    def initialize(silent: false)
+    def initialize(push_notifications:, log_samples:)
       @nightscout = Nightscout.new
       @scheduler = Rufus::Scheduler.new
-      @silent = silent
+      @push_notifications = push_notifications
+      @log_samples = log_samples
     end
 
     def sample_every(interval)
-      Nightscout::Sample.print_column_headers unless @silent
+      Nightscout::Sample.print_column_headers if @log_samples
       @scheduler.every(interval, first: :now) do |job|
         sample = fetch_sample
-        sample.print_row unless @silent
+        sample.print_row if @log_samples
         report_problems(sample)
         job.next_time = sample.next_time if sample.mistimed?
       rescue Overnight::Error => e
@@ -58,7 +59,7 @@ module Overnight
 
       problems.each { warn "Warning: #{it}" } # always log warnings to stderr
       message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
-      post_warning(message, messages_per_hour)
+      post_warning(message, messages_per_hour) if @push_notifications
     end
 
     def post_warning(message, messages_per_hour)
