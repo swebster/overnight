@@ -17,11 +17,11 @@ function supports_host_gateway() {
   printf '%s\n' $PODMAN_MIN_VER "$podman_version" | sort -C -V
 }
 
-function service_exists () {
+function service_exists() {
   systemctl --user list-unit-files "$1.service" &>/dev/null
 }
 
-function add_host_gateway () {
+function add_host_gateway() {
   read -rp 'Are you installing this service on your Nightscout server? [y/N] ' response
   response=${response,,} # to lowercase
   if [[ "$response" =~ ^(yes|y)$ ]]; then
