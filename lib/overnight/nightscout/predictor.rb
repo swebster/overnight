@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require 'overnight/nightscout/entry_range'
+require 'overnight/nightscout/problem'
 require 'overnight/nightscout/treatment'
 
 module Overnight
@@ -74,51 +74,12 @@ module Overnight
 
       def handle_low(type)
         er = predicted_low
-        [format_problem(er, :low, type)] unless er.empty? || low_treated?
+        [Problem.new(er, :low, type).to_s] unless er.empty? || low_treated?
       end
 
       def handle_high(type)
         er = predicted_high
-        [format_problem(er, :high, type)] unless er.empty? || high_treated?
-      end
-
-      def format_problem(entry_ranges, problem, type)
-        time = format_time(entry_ranges.first, type)
-        duration = (get_duration(entry_ranges, type) / 60).round
-        min_max = format_min_max(entry_ranges, problem)
-        "#{type.capitalize} #{problem} #{time} #{duration} minutes, #{min_max}"
-      end
-
-      def format_time(entry, type)
-        if type == :predicted
-          "at #{Printer.format_time(entry.time, with_seconds: false)} for"
-        else
-          'for next'
-        end
-      end
-
-      def get_duration(entry_ranges, type)
-        if type == :urgent
-          entry_ranges.first.duration
-        else
-          entry_ranges.sum(&:duration)
-        end
-      end
-
-      def format_min_max(entry_ranges, problem)
-        if problem == :low
-          min = entry_ranges.min_by(&:min_entry)
-          "falling to #{format_glucose_time(min.min_entry, min.range)}"
-        else # :high
-          max = entry_ranges.max_by(&:max_entry)
-          "rising to #{format_glucose_time(max.max_entry, max.range)}"
-        end
-      end
-
-      def format_glucose_time(entry, range)
-        glucose = Printer.format_glucose(entry.glucose, range)
-        time = Printer.format_time(entry.time, with_seconds: false)
-        "#{glucose} by #{time}"
+        [Problem.new(er, :high, type).to_s] unless er.empty? || high_treated?
       end
 
       def low_treated?
