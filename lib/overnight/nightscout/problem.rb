@@ -20,6 +20,10 @@ module Overnight
         @type = type
       end
 
+      def priority
+        (@type == :urgent ? 1 : 0) + (@category == :low ? 1 : 0)
+      end
+
       def to_s
         time = format_time(@entry_ranges.first)
         duration = (duration_seconds / 60).round

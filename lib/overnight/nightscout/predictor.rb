@@ -32,14 +32,14 @@ module Overnight
         predicted_high.any?
       end
 
-      def problems
+      def problem
         case @entry_ranges.first.range
         when :urgent_low then handle_low(:urgent)
         when :low then handle_low(:persistent)
         when :high then handle_high(:persistent)
         when :urgent_high then handle_high(:urgent)
         else handle_low(:predicted) || handle_high(:predicted)
-        end || EMPTY_ARRAY
+        end
       end
 
       private
@@ -74,12 +74,12 @@ module Overnight
 
       def handle_low(type)
         er = predicted_low
-        [Problem.new(er, :low, type).to_s] unless er.empty? || low_treated?
+        Problem.new(er, :low, type) unless er.empty? || low_treated?
       end
 
       def handle_high(type)
         er = predicted_high
-        [Problem.new(er, :high, type).to_s] unless er.empty? || high_treated?
+        Problem.new(er, :high, type) unless er.empty? || high_treated?
       end
 
       def low_treated?

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'overnight/nightscout'
+require 'overnight/nightscout/no_data'
 require 'overnight/pushover'
 require 'rufus-scheduler'
 
@@ -46,28 +47,29 @@ module Overnight
 
     def report_problems(sample)
       if sample.missed_samples.zero?
-        warn_listeners(sample.problems, messages_per_hour: 2)
+        problem = sample.problem
+        warn_listeners(problem, messages_per_hour: 2) unless problem.nil?
       # Dexcom warns every 30 minutes, so warn after 15 and every 30 after that
       elsif ((sample.missed_samples + 3) % 6).zero?
-        message = "No data for the last #{sample.delay / 60} minutes"
-        warn_listeners([message], messages_per_hour: 4)
+        problem = Nightscout::NoData.new(sample.delay / 60)
+        warn_listeners(problem, messages_per_hour: 4)
       end
     end
 
-    def warn_listeners(problems, messages_per_hour:)
-      return if problems.empty?
-
-      problems.each { warn "Warning: #{it}" } # always log warnings to stderr
-      message = problems.map { Nightscout::Printer.format_plain(it) }.join("\n")
-      post_warning(message, messages_per_hour) if @push_notifications
+    def warn_listeners(problem, messages_per_hour:)
+      formatted_message = problem.to_s
+      warn "Warning: #{formatted_message}" # always log warnings to stderr
+      message = Nightscout::Printer.format_plain(formatted_message)
+      priority = problem.priority
+      post_warning(message, priority, messages_per_hour) if @push_notifications
     end
 
-    def post_warning(message, messages_per_hour)
+    def post_warning(message, priority, messages_per_hour)
       interval = @last_posted.nil? ? nil : (Time.now - @last_posted).floor / 60
       min_interval = (60 / messages_per_hour.clamp(2..6)) - 1
       return if !interval.nil? && interval < min_interval
 
-      Pushover.post(message, title: 'Warning')
+      Pushover.post(message, title: 'Warning', priority:)
       @last_posted = Time.now
     end
   end

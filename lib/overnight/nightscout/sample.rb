@@ -42,8 +42,8 @@ module Overnight
         EntryRange.each_transition(entry_ranges, &print)
       end
 
-      def problems
-        Predictor.new(entry_ranges, @treatments).problems
+      def problem
+        Predictor.new(entry_ranges, @treatments).problem
       end
 
       # number of seconds since Nightscout last received data from Loop
