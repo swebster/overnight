@@ -90,21 +90,19 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   def test_problem_when_predicted_low
     er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
     pred = create_predictor(er)
-    refute_empty pred.problems
-    refute_empty pred.problems.first
+    refute_nil pred.problem
   end
 
-  def test_no_problems_when_normal
+  def test_no_problem_when_normal
     er = create_er_minutes([:normal], [120])
     pred = create_predictor(er)
-    assert_empty pred.problems
+    assert_nil pred.problem
   end
 
   def test_problem_when_predicted_high
     er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
     pred = create_predictor(er)
-    refute_empty pred.problems
-    refute_empty pred.problems.first
+    refute_nil pred.problem
   end
 
   private

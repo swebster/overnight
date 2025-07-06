@@ -4,6 +4,19 @@ require 'overnight/nightscout/entry_range'
 
 module Overnight
   class Nightscout
+    # describes the situation in which expected data has not been received
+    class NoData
+      def initialize(minutes)
+        @minutes = minutes
+      end
+
+      def priority = 0
+
+      def to_s
+        "No data for the last #{@minutes} minutes"
+      end
+    end
+
     # describes a problematic glycemic event
     class Problem
       VALID_CATEGORIES = %i[low high].freeze
@@ -18,6 +31,10 @@ module Overnight
         @entry_ranges = entry_ranges
         @category = category
         @type = type
+      end
+
+      def priority
+        (@type == :urgent ? 1 : 0) + (@category == :low ? 1 : 0)
       end
 
       def to_s
