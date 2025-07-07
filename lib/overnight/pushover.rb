@@ -13,8 +13,18 @@ module Overnight
       params = { token: APP_TOKEN, user: USER_KEY, title:, message:, priority: }
       # retry urgent messages every 60 seconds for 30 minutes until acknowledged
       params.update({ retry: 60, expire: 1800 }) if priority == 2
+      sound = notification_sound(priority)
+      params[:sound] = sound unless sound.nil?
       request = Typhoeus::Request.new(url, method: :post, params:)
       request.run.tap { |response| validate_http(response) }.body
+    end
+
+    def self.notification_sound(priority)
+      case priority
+      when 2 then 'echo'
+      when 1 then 'pushover'
+      when 0 then 'vibrate'
+      end
     end
   end
 end
