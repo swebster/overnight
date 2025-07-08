@@ -2,12 +2,20 @@
 # frozen_string_literal: true
 
 require 'bundler/setup'
-require 'json'
 require 'overnight/pushover'
+require 'overnight/pushover/options'
 
 begin
-  response_body = Overnight::Pushover.post('Initial test', title: 'Test')
-  puts JSON.pretty_generate(JSON.parse(response_body))
+  options = Overnight::Pushover::Options.parse
+  if options.empty?
+    Overnight::Pushover.list_groups
+  elsif options.key?(:group) && options.size == 1
+    group_name = options[:group]
+    Overnight::Pushover.create_group_or_list_users(group_name)
+  else
+    values = options.fetch_values(*%i[group user name])
+    Overnight::Pushover.add_user(*values)
+  end
 rescue Overnight::Error => e
   warn e.message
 end
