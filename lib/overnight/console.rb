@@ -60,8 +60,13 @@ module Overnight
       formatted_message = problem.to_s
       warn "Warning: #{formatted_message}" # always log warnings to stderr
       message = Nightscout::Printer.format_plain(formatted_message)
-      priority = problem.priority
+      priority = overnight_boost(problem.priority, Time.now)
       post_warning(message, priority, messages_per_hour) if @push_notifications
+    end
+
+    def overnight_boost(priority, time)
+      overnight_hours = [*(0..6), 23]
+      overnight_hours.include?(time.hour) ? (priority + 1).clamp(..2) : priority
     end
 
     def post_warning(message, priority, messages_per_hour)
