@@ -1,30 +1,61 @@
 # frozen_string_literal: true
 
-require 'overnight/http_client'
-require 'overnight/pushover/config'
+require 'overnight/pushover/client'
 
 module Overnight
   # provides a wrapper around the Pushover API
   module Pushover
-    extend HTTPClient
-
-    def self.post(message, title:, priority: 0)
-      url = 'https://api.pushover.net/1/messages.json'
-      params = { token: APP_TOKEN, user: USER_KEY, title:, message:, priority: }
-      # retry urgent messages every 60 seconds for 30 minutes until acknowledged
-      params.update({ retry: 60, expire: 1800 }) if priority == 2
-      sound = notification_sound(priority)
-      params[:sound] = sound unless sound.nil?
-      request = Typhoeus::Request.new(url, method: :post, params:)
-      request.run.tap { |response| validate_http(response) }.body
+    def self.list_groups
+      groups = Client.list_groups
+      if groups.empty?
+        puts 'No groups currently exist'
+      else
+        puts 'The following groups are available:'
+        puts groups
+      end
     end
 
-    def self.notification_sound(priority)
-      case priority
-      when 2 then 'echo'
-      when 1 then 'pushover'
-      when 0 then 'vibrate'
+    def self.find_group_key(group_name)
+      groups = Client.list_groups
+      group = groups.find { it[:name] == group_name }
+      group[:group] if group
+    end
+
+    def self.create_group(group_name)
+      group_key = Client.create_group(group_name)
+      puts "Group '#{group_name}' created with key '#{group_key}'"
+      group_key
+    end
+
+    def self.list_users(group_name, group_key)
+      users = Client.list_users(group_key:)
+      if users.empty?
+        puts "The '#{group_name}' group has no members"
+      else
+        puts "The following users are members of the '#{group_name}' group:"
+        puts users
       end
+    end
+
+    def self.create_group_or_list_users(group_name)
+      group_key = find_group_key(group_name)
+      if group_key.nil?
+        create_group(group_name)
+      else
+        list_users(group_name, group_key)
+      end
+    end
+
+    def self.add_user(group_name, user_key, user_name)
+      group_key = find_group_key(group_name)
+      raise Error, "The '#{group_name}' group does not exist" if group_key.nil?
+
+      Client.add_user(group_key:, user_key:, user_name:)
+      puts "User '#{user_name}' has been added to the '#{group_name}' group"
+    end
+
+    def self.post(...)
+      Client.post(...)
     end
   end
 end
