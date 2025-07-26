@@ -3,6 +3,7 @@
 require 'json'
 require 'overnight/http_client'
 require 'overnight/pushover/config'
+require 'overnight/pushover/url'
 require 'overnight/pushover/validator'
 
 module Overnight
@@ -12,35 +13,32 @@ module Overnight
       extend HTTPClient
 
       def self.create_group(name)
-        url = 'https://api.pushover.net/1/groups.json'
-        parse_hash(run(url, method: :post, params: { name: }), :group)
+        parse_hash(run(Url.groups, method: :post, params: { name: }), :group)
       end
 
       def self.list_groups
-        parse_hash(run('https://api.pushover.net/1/groups.json'), :groups)
+        parse_hash(run(Url.groups), :groups)
       end
 
       def self.add_user(group_key:, user_key:, user_name:)
         Validator.validate_key(group_key, type: :group)
         Validator.validate_key(user_key,  type: :user)
-        url = "https://api.pushover.net/1/groups/#{group_key}/add_user.json"
+        url = Url.groups(group_key, 'add_user')
         run(url, method: :post, params: { user: user_key, memo: user_name })
       end
 
       def self.list_users(group_key:)
         Validator.validate_key(group_key, type: :group)
-        url = "https://api.pushover.net/1/groups/#{group_key}.json"
-        parse_hash(run(url), :users)
+        parse_hash(run(Url.groups(group_key)), :users)
       end
 
       def self.post(message, title:, priority: 0)
-        url = 'https://api.pushover.net/1/messages.json'
         params = { user: USER_KEY, title:, message:, priority: }
         # retry urgent messages every 60 seconds for 30 minutes until acknowledged
         params.update({ retry: 60, expire: 1800 }) if priority == 2
         sound = notification_sound(priority)
         params[:sound] = sound unless sound.nil?
-        run(url, method: :post, params:)
+        run(Url.messages, method: :post, params:)
       end
 
       def self.notification_sound(priority)
