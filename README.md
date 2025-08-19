@@ -12,10 +12,10 @@ You need a Linux server (or virtual machine) to run the various scripts included
 - Ensure that [Task](https://taskfile.dev/installation/) is installed
 - Switch to a user account that has been [configured to run rootless Podman](https://github.com/containers/podman/blob/main/docs/tutorials/rootless_tutorial.md#etcsubuid-and-etcsubgid-configuration), such as the podman user created by [this Nightscout installer](https://github.com/swebster/nightscout-installer/blob/main/bootstrap.sh)
 - Clone this repository and cd to the working directory
-- Run ```task podman:run -- bin/overnight --push-notifications --log```
+- Run ```task overnight:run -- --push-notifications --log```
 - Respond to the prompts requesting your Nightscout details, Pushover tokens, etc.
 
-If all goes well, you should see several values from Nightscout logged to the console every five minutes. If not, double-check the contents of the generated .env.local and .env.secrets config files. If you find any errors, correct the config files directly and then run ```podman secret rm nightscout_user pushover_user_key pushover_app_token``` before retrying the podman:run task listed above.
+If all goes well, you should see several values from Nightscout logged to the console every five minutes. If not, double-check the contents of the generated .env.local and .env.secrets config files. If you find any errors, correct the config files directly and then run ```podman secret rm nightscout_user pushover_user_key pushover_app_token``` before retrying the overnight:run task listed above.
 
 Stop the running container with Ctrl+C before proceeding to the next section.
 

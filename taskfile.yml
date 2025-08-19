@@ -53,9 +53,10 @@ tasks:
     cmds:
       - podman build . -t {{.OVERNIGHT}}
     sources:
+      - .dockerignore
       - Dockerfile
       - Gemfile*
-      - bin/overnight
+      - bin/*
       - lib/**/*.rb
       - overnight.gemspec
     status:
@@ -78,22 +79,34 @@ tasks:
     status:
       - test {{len .MISSING_SECRETS}} -eq 0
 
-  podman:run:internal:
+  podman:run:*:
+    internal: true
     deps: [podman:secrets, podman:build]
     vars:
-      RUN_OPTIONS:
-        sh: paste -s -d ' ' {{.PODMAN_OPTIONS_FILE}}
-      TARGET: 'localhost/{{.OVERNIGHT}}:latest'
+      COMMAND: '{{index .MATCH 0}}'
     cmds:
-      - podman run -it --rm {{.RUN_OPTIONS}} {{.OVERNIGHT}} {{.CLI_ARGS}}
-    status:
-      - podman ps --format '{{`{{.Image}}`}}' | grep -qx {{.TARGET}}
+      - podman run -it --rm {{.RUN_OPTIONS}} {{.OVERNIGHT}} bin/{{.COMMAND}} {{.CLI_ARGS}}
 
-  podman:run:
+  pushover:groups:
+    desc: Configure Pushover user groups
+    deps: [config:podman]
+    cmds:
+      - task: podman:run:pushover
+        vars:
+          RUN_OPTIONS:
+            sh: grep -i pushover {{.PODMAN_OPTIONS_FILE}} | paste -s -d ' '
+
+  overnight:run:
     desc: Run overnight in a container
     deps: [config:podman]
     cmds:
-      - task: podman:run:internal
+      - task: podman:run:overnight
+        vars:
+          CLI_ARGS: '{{.CLI_ARGS | default "--help"}}'
+          RUN_OPTIONS:
+            sh: paste -s -d ' ' {{.PODMAN_OPTIONS_FILE}}
+    status:
+      - podman ps --format '{{`{{.Names}}`}}' | grep -qx overnight
 
   podlet:pull:
     desc: Pull a container image for running podlet
