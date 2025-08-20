@@ -5,7 +5,7 @@ This repository provides a Ruby gem to monitor an instance of [Nightscout](https
 
 ## Prerequisites
 
-You need a Linux server (or virtual machine) to run the various scripts included in this repository. They have been tested on Ubuntu and Fedora, so derivatives of those distros are likely to work too. All intended recipients of Pushover notifications must have a [licensed copy of Pushover](https://pushover.net/pricing) installed, and you will need to generate an [API token](https://pushover.net/api#registration) and a [user (or group) identifier](https://pushover.net/api#identifiers) as well.
+You need a Linux server (or virtual machine) to run the various scripts included in this repository. They have been tested on Ubuntu and Fedora, so derivatives of those distros are likely to work too. All intended recipients of Pushover notifications must have a [licensed copy of Pushover](https://pushover.net/pricing) installed, and you will need to generate an [API token](https://pushover.net/api#registration) and copy your [user key](https://pushover.net/api#identifiers) from the [Pushover dashboard](https://pushover.net/dashboard).
 
 # Configuration
 
@@ -18,6 +18,15 @@ You need a Linux server (or virtual machine) to run the various scripts included
 If all goes well, you should see several values from Nightscout logged to the console every five minutes. If not, double-check the contents of the generated .env.local and .env.secrets config files. If you find any errors, correct the config files directly and then run ```podman secret rm nightscout_user pushover_user_key pushover_app_token``` before retrying the overnight:run task listed above.
 
 Stop the running container with Ctrl+C before proceeding to the next section.
+
+## Group Notifications (optional)
+
+The default configuration will send Pushover notifications to a single user. If you want to send notifications to a group (e.g. family members), you should first identify their individual user keys (in the Settings tab of the Pushover app). Then perform the following:
+
+- Run ```task pushover:groups -- --group GROUP_NAME``` to create the group GROUP_NAME
+- Run ```task pushover:groups -- --group GROUP_NAME --user USER_KEY --name USER_NAME``` to add each user
+- Edit the .env.secrets file and assign PUSHOVER_USER_KEY the new group key instead of your user key
+- Run ```podman secret rm pushover_user_key``` and then try the overnight:run task again
 
 # Installation
 
