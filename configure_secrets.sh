@@ -20,19 +20,17 @@ function config_pushover_user_key() {
   echo "PUSHOVER_USER_KEY=${pushover_user_key}"
 }
 
-if [[ ! -f "${ENV_SECRETS}" ]]; then
-  grep COMPOSE_FILE "${ENV_SECRETS}.template" > "${TMP_SECRETS}"
+grep COMPOSE_FILE "${ENV_SECRETS}.template" > "${TMP_SECRETS}"
 
-  config_nightscout_user
-  config_pushover_app_token
-  config_pushover_user_key
+config_nightscout_user
+config_pushover_app_token
+config_pushover_user_key
 
-  printf '%s=%s\n' \
-    NIGHTSCOUT_USER "${nightscout_user}" \
-    PUSHOVER_APP_TOKEN "${pushover_app_token}" \
-    PUSHOVER_USER_KEY "${pushover_user_key}" \
-    > "${TMP_SECRETS}"
+printf '%s=%s\n' \
+  NIGHTSCOUT_USER "${nightscout_user}" \
+  PUSHOVER_APP_TOKEN "${pushover_app_token}" \
+  PUSHOVER_USER_KEY "${pushover_user_key}" \
+  > "${TMP_SECRETS}"
 
-  mv -f "${TMP_SECRETS}" "${ENV_SECRETS}"
-  chmod 0600 "${ENV_SECRETS}"
-fi
+mv -f "${TMP_SECRETS}" "${ENV_SECRETS}"
+chmod 0600 "${ENV_SECRETS}"

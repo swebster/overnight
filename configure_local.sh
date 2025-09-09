@@ -38,21 +38,19 @@ function config_timezone() {
   echo "TZ=${timezone}"
 }
 
-if [[ ! -f "${ENV_LOCAL}" ]]; then
-  config_nightscout_host
-  config_nightscout_port
-  config_overnight_begin
-  config_overnight_end
-  config_timezone
+config_nightscout_host
+config_nightscout_port
+config_overnight_begin
+config_overnight_end
+config_timezone
 
-  printf '%s=%s\n' \
-    NIGHTSCOUT_HOST "${nightscout_host}" \
-    NIGHTSCOUT_PORT "${nightscout_port}" \
-    OVERNIGHT_PERIOD_BEGIN "${overnight_begin}" \
-    OVERNIGHT_PERIOD_END "${overnight_end}" \
-    TZ "${timezone}" \
-    > "${TMP_LOCAL}"
+printf '%s=%s\n' \
+  NIGHTSCOUT_HOST "${nightscout_host}" \
+  NIGHTSCOUT_PORT "${nightscout_port}" \
+  OVERNIGHT_PERIOD_BEGIN "${overnight_begin}" \
+  OVERNIGHT_PERIOD_END "${overnight_end}" \
+  TZ "${timezone}" \
+  > "${TMP_LOCAL}"
 
-  # exclude the default port from the configuration file
-  grep -xv "NIGHTSCOUT_PORT=${DEFAULT_PORT}" "${TMP_LOCAL}" > "${ENV_LOCAL}"
-fi
+# exclude the default port from the configuration file
+grep -xv "NIGHTSCOUT_PORT=${DEFAULT_PORT}" "${TMP_LOCAL}" > "${ENV_LOCAL}"
