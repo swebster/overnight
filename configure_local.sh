@@ -17,6 +17,20 @@ function config_nightscout_port() {
   echo "NIGHTSCOUT_PORT=${nightscout_port}"
 }
 
+function config_overnight_begin() {
+  local -r default_begin=23
+  read -rp "Start priority monitoring at hour [${default_begin}]: " overnight_begin
+  overnight_begin=${overnight_begin:-$default_begin}
+  printf 'OVERNIGHT_PERIOD_BEGIN=%02d:00\n' "${overnight_begin}"
+}
+
+function config_overnight_end() {
+  local -r default_end=7
+  read -rp "Stop priority monitoring at hour [${default_end}]: " overnight_end
+  overnight_end=${overnight_end:-$default_end}
+  printf 'OVERNIGHT_PERIOD_END=%02d:00\n' "${overnight_end}"
+}
+
 function config_timezone() {
   local -r default_timezone=$(timedatectl show | sed -ne 's/^Timezone=//p')
   read -rp "Enter your local timezone [${default_timezone}]: " timezone
@@ -27,11 +41,15 @@ function config_timezone() {
 if [[ ! -f "${ENV_LOCAL}" ]]; then
   config_nightscout_host
   config_nightscout_port
+  config_overnight_begin
+  config_overnight_end
   config_timezone
 
   printf '%s=%s\n' \
     NIGHTSCOUT_HOST "${nightscout_host}" \
     NIGHTSCOUT_PORT "${nightscout_port}" \
+    OVERNIGHT_PERIOD_BEGIN "${overnight_begin}" \
+    OVERNIGHT_PERIOD_END "${overnight_end}" \
     TZ "${timezone}" \
     > "${TMP_LOCAL}"
 

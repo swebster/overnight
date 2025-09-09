@@ -78,4 +78,34 @@ class TestEnv < Minitest::Test
       end
     end
   end
+
+  def test_fetch_unsigned
+    ClimateControl.modify({ REQUIRED_KEY => '123' }) do
+      value = Env.fetch_unsigned(REQUIRED_KEY) # should not raise Overnight::Error
+      assert_equal 123, value
+    end
+  end
+
+  def test_fetch_invalid_unsigned
+    ClimateControl.modify({ REQUIRED_KEY => 'some_value' }) do
+      error = assert_raises(Error) { Env.fetch_unsigned(REQUIRED_KEY) }
+      assert_match(/\bNon-unsigned value\b/, error.message)
+      assert_match(/\b#{REQUIRED_KEY}\b/, error.message)
+    end
+  end
+
+  def test_fetch_hour
+    ClimateControl.modify({ REQUIRED_KEY => '23' }) do
+      value = Env.fetch_hour(REQUIRED_KEY) # should not raise Overnight::Error
+      assert_equal 23, value
+    end
+  end
+
+  def test_fetch_invalid_hour
+    ClimateControl.modify({ REQUIRED_KEY => '25' }) do
+      error = assert_raises(Error) { Env.fetch_hour(REQUIRED_KEY) }
+      assert_match(/\bNot a valid hour\b/, error.message)
+      assert_match(/\b#{REQUIRED_KEY}\b/, error.message)
+    end
+  end
 end

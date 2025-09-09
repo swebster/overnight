@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require 'overnight/config'
 require 'overnight/nightscout'
 require 'overnight/nightscout/no_data'
 require 'overnight/pushover'
@@ -65,7 +66,7 @@ module Overnight
     end
 
     def overnight_boost(priority, time)
-      overnight_hours = [*(0..6), 23]
+      overnight_hours = Utils.hours_in_range(PERIOD_BEGIN, PERIOD_END)
       overnight_hours.include?(time.hour) ? (priority + 1).clamp(..2) : priority
     end
 
