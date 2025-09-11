@@ -9,6 +9,9 @@ begin
   options = Overnight::Pushover::Options.parse
   if options.empty?
     Overnight::Pushover.list_groups
+  elsif options.key?(:message)
+    priority = options[:priority] || 0
+    Overnight::Pushover.post(options[:message], priority:)
   elsif options.key?(:group) && options.size == 1
     group_name = options[:group]
     Overnight::Pushover.create_group_or_list_users(group_name)

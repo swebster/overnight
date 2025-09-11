@@ -2,7 +2,6 @@
 
 require 'optparse'
 require 'overnight/pushover/config'
-require 'overnight/pushover/validator'
 
 module Overnight
   module Pushover
@@ -11,9 +10,11 @@ module Overnight
       def self.create_parser
         OptionParser.new do |opts|
           opts.banner = "Usage: #{$PROGRAM_NAME} [options]"
-          opts.on('-g', '--group GROUP_NAME', 'Name of the Pushover group')
-          opts.on('-u', '--user  USER_KEY', 'User to add to the group')
-          opts.on('-n', '--name  USER_NAME', 'Name of the added user')
+          opts.on('-g', '--group    GROUP_NAME', 'Name of the Pushover group')
+          opts.on('-u', '--user     USER_KEY',   'User to add to the group')
+          opts.on('-n', '--name     USER_NAME',  'Name of the added user')
+          opts.on('-m', '--message  MESSAGE',    'Message to post to Pushover')
+          opts.on('-p', '--priority PRIORITY', Integer, 'Message priority')
         end
       end
 
@@ -26,11 +27,9 @@ module Overnight
       def self.parse
         {}.tap do |options|
           create_parser.parse!(into: options)
-          if options.key?(:user)
-            assert_present(options, %i[group name])
-            Validator.validate_key(options[:user], type: :user)
-          end
-          assert_present(options, %i[user]) if options.key?(:name)
+          assert_present(options, %i[group name]) if options.key?(:user)
+          assert_present(options, %i[user])       if options.key?(:name)
+          assert_present(options, %i[message])    if options.key?(:priority)
         end
       end
     end
