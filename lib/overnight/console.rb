@@ -75,7 +75,7 @@ module Overnight
       min_interval = (60 / messages_per_hour.clamp(2..6)) - 1
       return if !interval.nil? && interval < min_interval
 
-      Pushover.post(message, title: 'Warning', priority:)
+      Pushover.post(message, priority:)
       @last_posted = Time.now
     end
   end
