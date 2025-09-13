@@ -15,8 +15,16 @@ module Overnight
         join('groups', *)
       end
 
-      def self.messages(*)
-        join('messages', *)
+      def self.messages
+        join('messages')
+      end
+
+      def self.receipts(receipt)
+        join('receipts', receipt)
+      end
+
+      def self.validate_user
+        join('users', 'validate')
       end
     end
   end
