@@ -13,11 +13,11 @@ module Overnight
       extend HTTPClient
 
       def self.create_group(name)
-        parse_hash(run(Url.groups, method: :post, params: { name: }), :group)
+        parse_hash(run(Url.groups, method: :post, params: { name: }))[:group]
       end
 
       def self.list_groups
-        parse_hash(run(Url.groups), :groups)
+        parse_hash(run(Url.groups))[:groups]
       end
 
       def self.add_user(group_key:, user_key:, user_name:)
@@ -29,7 +29,7 @@ module Overnight
 
       def self.list_users(group_key:)
         Validator.validate_key(group_key, type: :group)
-        parse_hash(run(Url.groups(group_key)), :users)
+        parse_hash(run(Url.groups(group_key)))[:users]
       end
 
       def self.post(message, title: nil, priority: 0)
@@ -38,7 +38,13 @@ module Overnight
         params.update({ retry: 60, expire: 1800 }) if priority == 2
         options = { sound: sound_by(priority), title: title || title_by(priority) }
         params.update(options.compact)
-        run(Url.messages, method: :post, params:)
+        response_body = run(Url.messages, method: :post, params:)
+        parse_hash(response_body)[:receipt] unless response_body.nil?
+      end
+
+      def self.status(receipt:)
+        Validator.validate_key(receipt, type: :receipt)
+        parse_hash(run(Url.receipts(receipt)))
       end
 
       def self.sound_by(priority)
@@ -64,8 +70,8 @@ module Overnight
         request.run.tap { |response| validate_http(response) }.body
       end
 
-      def self.parse_hash(response_body, key)
-        JSON.parse(response_body, symbolize_names: true)[key]
+      def self.parse_hash(response_body)
+        JSON.parse(response_body, symbolize_names: true)
       end
     end
   end

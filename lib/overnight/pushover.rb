@@ -57,5 +57,10 @@ module Overnight
     def self.post(...)
       Client.post(...)
     end
+
+    def self.check_status(receipt)
+      status = Client.status(receipt:)
+      status if status[:acknowledged] == 1 || status[:expired] == 1
+    end
   end
 end
