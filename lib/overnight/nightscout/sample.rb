@@ -26,7 +26,7 @@ module Overnight
         @treatments = treatments
       end
 
-      def print_row # rubocop:disable Metrics/AbcSize
+      def format_row # rubocop:disable Metrics/AbcSize
         entries = [latest_entry] + predicted_entries(12).minmax
         local_date = Printer.format_date_time(@synchronizer.request_time)
         status_time = Printer.format_time(@status.time)
@@ -34,7 +34,7 @@ module Overnight
         glucose = entries.map { format_glucose(it) }.join(' ')
         iob = Printer.format_iob(loop.iob)
         cob = Printer.format_cob(loop.cob)
-        puts "#{local_date} #{status_time} #{entry_time} #{glucose} #{iob} #{cob}"
+        "#{local_date} #{status_time} #{entry_time} #{glucose} #{iob} #{cob}"
       end
 
       def print_transitions

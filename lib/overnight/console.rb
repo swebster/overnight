@@ -21,7 +21,7 @@ module Overnight
       Nightscout::Sample.print_column_headers if @log_samples
       schedule_every(interval, first: :now) do |job|
         sample = fetch_sample
-        @mutex.synchronize { sample.print_row } if @log_samples
+        print_row(sample) if @log_samples
         report_problems(sample)
         job.next_time = sample.next_time if sample.mistimed?
       end
@@ -43,6 +43,11 @@ module Overnight
       keys = %i[entry device_status status treatment]
       values = @nightscout.get.fetch_values(*keys)
       Nightscout::Sample.new(time, *values)
+    end
+
+    def print_row(sample)
+      formatted_row = sample.format_row
+      @mutex.synchronize { puts formatted_row }
     end
 
     def report_problems(sample)
