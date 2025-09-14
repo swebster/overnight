@@ -5,13 +5,23 @@ require 'bundler/setup'
 require 'overnight/pushover'
 require 'overnight/pushover/options'
 
+def wait_for_ack(receipt)
+  loop do
+    sleep 5
+    if (status = Overnight::Pushover.check_status(receipt))
+      return Overnight::Pushover.publish_response(status)
+    end
+  end
+end
+
 begin
   options = Overnight::Pushover::Options.parse
   if options.empty?
     Overnight::Pushover.list_groups
   elsif options.key?(:message)
     priority = options[:priority] || 0
-    Overnight::Pushover.post(options[:message], priority:)
+    receipt = Overnight::Pushover.post(options[:message], priority:)
+    wait_for_ack(receipt) if receipt && Overnight::Pushover.using_group_key?
   elsif options.key?(:group) && options.size == 1
     group_name = options[:group]
     Overnight::Pushover.create_group_or_list_users(group_name)

@@ -12,19 +12,18 @@ module Overnight
     def initialize(push_notifications:, log_samples:)
       @nightscout = Nightscout.new
       @scheduler = Rufus::Scheduler.new
+      @mutex = Mutex.new # for synchronizing output from concurrent tasks
       @push_notifications = push_notifications
       @log_samples = log_samples
     end
 
     def sample_every(interval)
       Nightscout::Sample.print_column_headers if @log_samples
-      @scheduler.every(interval, first: :now) do |job|
+      schedule_every(interval, first: :now) do |job|
         sample = fetch_sample
-        sample.print_row if @log_samples
+        @mutex.synchronize { sample.print_row } if @log_samples
         report_problems(sample)
         job.next_time = sample.next_time if sample.mistimed?
-      rescue Overnight::Error => e
-        warn e.message
       end
     end
 
@@ -59,7 +58,8 @@ module Overnight
 
     def warn_listeners(problem, messages_per_hour:)
       formatted_message = problem.to_s
-      warn "Warning: #{formatted_message}" # always log warnings to stderr
+      # always log warnings to stderr
+      @mutex.synchronize { warn "Warning: #{formatted_message}" }
       message = Nightscout::Printer.format_plain(formatted_message)
       priority = overnight_boost(problem.priority, Time.now)
       post_warning(message, priority, messages_per_hour) if @push_notifications
@@ -75,8 +75,26 @@ module Overnight
       min_interval = (60 / messages_per_hour.clamp(2..6)) - 1
       return if !interval.nil? && interval < min_interval
 
-      Pushover.post(message, priority:)
+      receipt = Pushover.post(message, priority:)
       @last_posted = Time.now
+      wait_for_ack(receipt) if receipt && Pushover.using_group_key?
+    end
+
+    def wait_for_ack(receipt)
+      schedule_every('1m', first: '30s', times: 30) do |job|
+        if (status = Pushover.check_status(receipt))
+          job.unschedule
+          Pushover.publish_response(status)
+        end
+      end
+    end
+
+    def schedule_every(*, **, &block)
+      @scheduler.every(*, **) do |job|
+        block.call(job)
+      rescue Overnight::Error => e
+        @mutex.synchronize { warn e.message }
+      end
     end
   end
 end
