@@ -54,6 +54,10 @@ module Overnight
       puts "User '#{user_name}' has been added to the '#{group_name}' group"
     end
 
+    def self.using_group_key?
+      @using_group_key ||= Client.group_key?(user_key: USER_KEY)
+    end
+
     def self.post(...)
       Client.post(...)
     end
@@ -61,6 +65,16 @@ module Overnight
     def self.check_status(receipt)
       status = Client.status(receipt:)
       status if status[:acknowledged] == 1 || status[:expired] == 1
+    end
+
+    private_class_method def self.user_group
+      @user_group ||=
+        if using_group_key?
+          users = Client.list_users(group_key: USER_KEY)
+          users.to_h { [it[:user], it.except(:user)] }
+        else
+          {}
+        end
     end
   end
 end

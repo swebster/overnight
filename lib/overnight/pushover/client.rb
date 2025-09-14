@@ -32,6 +32,11 @@ module Overnight
         parse_hash(run(Url.groups(group_key)))[:users]
       end
 
+      def self.group_key?(user_key:)
+        url = Url.validate_user
+        parse_hash(run(url, method: :post, params: { user: user_key }))[:group] == 1
+      end
+
       def self.post(message, title: nil, priority: 0)
         params = { user: USER_KEY, message:, priority: }
         # retry urgent messages every 60 seconds for 30 minutes until acknowledged
