@@ -7,7 +7,7 @@ require 'overnight/pushover/url'
 require 'overnight/pushover/validator'
 
 module Overnight
-  module Pushover
+  class Pushover
     # generic wrapper for all Pushover API requests and responses
     module Client
       extend HTTPClient

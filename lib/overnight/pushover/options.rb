@@ -4,7 +4,7 @@ require 'optparse'
 require 'overnight/pushover/config'
 
 module Overnight
-  module Pushover
+  class Pushover
     # a simple command-line options parser
     module Options
       def self.create_parser

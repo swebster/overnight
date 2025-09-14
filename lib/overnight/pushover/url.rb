@@ -3,7 +3,7 @@
 require 'uri'
 
 module Overnight
-  module Pushover
+  class Pushover
     # methods to generate Pushover URLs
     module Url
       private_class_method def self.join(*args)

@@ -3,7 +3,7 @@
 require 'overnight/error'
 
 module Overnight
-  module Pushover
+  class Pushover
     # provides methods to validate params before sending requests to Pushover
     module Validator
       VALID_KEY = /[A-Za-z0-9]{30}/

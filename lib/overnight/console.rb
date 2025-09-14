@@ -13,6 +13,7 @@ module Overnight
       @nightscout = Nightscout.new
       @scheduler = Rufus::Scheduler.new
       @mutex = Mutex.new # for synchronizing output from concurrent tasks
+      @pushover = Pushover.new
       @push_notifications = push_notifications
       @log_samples = log_samples
     end
@@ -80,16 +81,16 @@ module Overnight
       min_interval = (60 / messages_per_hour.clamp(2..6)) - 1
       return if !interval.nil? && interval < min_interval
 
-      receipt = Pushover.post(message, priority:)
+      receipt = @pushover.post(message, priority:)
       @last_posted = Time.now
-      wait_for_ack(receipt) if receipt && Pushover.using_group_key?
+      wait_for_ack(receipt) if receipt && @pushover.using_group_key?
     end
 
     def wait_for_ack(receipt)
       schedule_every('1m', first: '30s', times: 30) do |job|
-        if (status = Pushover.check_status(receipt))
+        if (status = @pushover.check_status(receipt))
           job.unschedule
-          Pushover.publish_response(status)
+          @pushover.publish_response(status)
         end
       end
     end
