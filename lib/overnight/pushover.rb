@@ -67,6 +67,28 @@ module Overnight
       status if status[:acknowledged] == 1 || status[:expired] == 1
     end
 
+    def self.publish_response(status)
+      options = { priority: -1 }
+      if status[:acknowledged] == 1
+        user_key = status[:acknowledged_by]
+        other_users = user_group.keys - [user_key]
+        options[:user] = other_users.join(',')
+      end
+      Client.post(generate_response(status), **options)
+    end
+
+    private_class_method def self.generate_response(status)
+      if status[:acknowledged] == 1
+        user_key = status[:acknowledged_by]
+        user_name = user_group.dig(user_key, :memo) || 'unknown user'
+        time = Time.at(status[:acknowledged_at]).strftime('%F %T')
+        "Emergency acknowledged by #{user_name} at #{time}"
+      else # status[:expired] == 1
+        time = Time.at(status[:expires_at]).strftime('%F %T')
+        "Emergency notification expired at #{time} without being acknowledged"
+      end
+    end
+
     private_class_method def self.user_group
       @user_group ||=
         if using_group_key?

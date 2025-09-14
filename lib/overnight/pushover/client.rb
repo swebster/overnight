@@ -37,8 +37,8 @@ module Overnight
         parse_hash(run(url, method: :post, params: { user: user_key }))[:group] == 1
       end
 
-      def self.post(message, title: nil, priority: 0)
-        params = { user: USER_KEY, message:, priority: }
+      def self.post(message, user: USER_KEY, title: nil, priority: 0)
+        params = { user:, message:, priority: }
         # retry urgent messages every 60 seconds for 30 minutes until acknowledged
         params.update({ retry: 60, expire: 1800 }) if priority == 2
         options = { sound: sound_by(priority), title: title || title_by(priority) }
@@ -62,9 +62,10 @@ module Overnight
 
       def self.title_by(priority)
         case priority
-        when 2 then 'Emergency'
-        when 1 then 'Warning'
-        when 0 then 'Notice'
+        when  2 then 'Emergency'
+        when  1 then 'Warning'
+        when  0 then 'Notice'
+        when -1 then 'Update'
         end
       end
 
