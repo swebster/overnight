@@ -7,7 +7,7 @@ require 'overnight/pushover/options'
 
 def post_message(pushover, message, **)
   receipt = pushover.post(message, **)
-  return unless receipt && pushover.using_group_key?
+  return unless receipt && pushover.group_notifications?
 
   loop do
     sleep 5

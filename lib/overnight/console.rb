@@ -83,7 +83,7 @@ module Overnight
 
       receipt = @pushover.post(message, priority:)
       @last_posted = Time.now
-      wait_for_ack(receipt) if receipt && @pushover.using_group_key?
+      wait_for_ack(receipt) if receipt && @pushover.group_notifications?
     end
 
     def wait_for_ack(receipt)

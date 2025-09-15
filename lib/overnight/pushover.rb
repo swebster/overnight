@@ -54,8 +54,8 @@ module Overnight
       puts "User '#{user_name}' has been added to the '#{group_name}' group"
     end
 
-    def using_group_key?
-      @using_group_key ||= Client.group_key?(user_key: USER_KEY)
+    def group_notifications?
+      user_group.size > 1
     end
 
     def post(...)
@@ -93,7 +93,7 @@ module Overnight
 
     def user_group
       @user_group ||=
-        if using_group_key?
+        if Client.group_key?(user_key: USER_KEY)
           users = Client.list_users(group_key: USER_KEY)
           users.to_h { [it[:user], it.except(:user)] }
         else
