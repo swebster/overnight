@@ -4,7 +4,7 @@ PATH
     overnight (0.1.0)
       dotenv (~> 3.1)
       dry-validation (~> 1.11)
-      json (~> 2.12)
+      json (~> 2.14)
       jwt (~> 3.1)
       rainbow (~> 3.1)
       rufus-scheduler (~> 3.9)
@@ -63,7 +63,7 @@ GEM
     fugit (1.11.2)
       et-orbi (~> 1, >= 1.2.11)
       raabro (~> 1.4)
-    json (2.13.2)
+    json (2.14.1)
     jwt (3.1.2)
       base64
     language_server-protocol (3.17.0.5)
