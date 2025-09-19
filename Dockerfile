@@ -1,6 +1,6 @@
 # syntax=docker/dockerfile:1
 
-FROM docker.io/library/ruby:3.4.5-alpine AS base
+FROM docker.io/library/ruby:3.4.6-alpine AS base
 
 RUN apk --no-cache add jemalloc libcurl patchelf tzdata && \
     patchelf --add-needed libjemalloc.so.2 /usr/local/bin/ruby && \
