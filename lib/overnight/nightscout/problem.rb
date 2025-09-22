@@ -20,7 +20,9 @@ module Overnight
         @type = type
       end
 
-      def priority
+      def priority(overnight:)
+        return 2 if overnight
+
         (@type == :urgent ? 1 : 0) + (@category == :low ? 1 : 0)
       end
 

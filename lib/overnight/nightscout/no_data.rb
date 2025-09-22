@@ -8,7 +8,9 @@ module Overnight
         @minutes = minutes
       end
 
-      def priority = 0
+      def priority(overnight:)
+        overnight ? 1 : 0
+      end
 
       def to_s
         "No data for the last #{@minutes} minutes"

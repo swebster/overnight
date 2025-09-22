@@ -67,13 +67,13 @@ module Overnight
       # always log warnings to stderr
       @mutex.synchronize { warn "Warning: #{formatted_message}" }
       message = Nightscout::Printer.format_plain(formatted_message)
-      priority = overnight_boost(problem.priority, Time.now)
+      priority = boost_priority(problem, Time.now)
       post_warning(message, priority, messages_per_hour) if @push_notifications
     end
 
-    def overnight_boost(priority, time)
+    def boost_priority(problem, time)
       overnight_hours = Utils.hours_in_range(PERIOD_BEGIN, PERIOD_END)
-      overnight_hours.include?(time.hour) ? (priority + 1).clamp(..2) : priority
+      problem.priority(overnight: overnight_hours.include?(time.hour))
     end
 
     def post_warning(message, priority, messages_per_hour)

@@ -91,7 +91,7 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
     pred = create_predictor(er)
     refute_nil pred.problem
-    assert_equal 1, pred.problem.priority
+    assert_equal 1, pred.problem.priority(overnight: false)
   end
 
   def test_no_problem_when_normal
@@ -104,7 +104,7 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
     pred = create_predictor(er)
     refute_nil pred.problem
-    assert_equal 0, pred.problem.priority
+    assert_equal 0, pred.problem.priority(overnight: false)
   end
 
   private
