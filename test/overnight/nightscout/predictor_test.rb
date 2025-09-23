@@ -57,6 +57,14 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal true, pred.low_predicted?
   end
 
+  def test_low_predicted_when_urgent_later
+    ranges = %i[normal low urgent_low]
+    durations_seconds = [LOW_NOTICE, LOW_DURATION, LOW_DURATION]
+    er = create_er_seconds(ranges, durations_seconds)
+    pred = create_predictor(er)
+    assert_equal true, pred.low_predicted?
+  end
+
   def test_high_not_predicted_when_normal
     er = create_er_minutes([:normal], [120])
     pred = create_predictor(er)
@@ -83,6 +91,14 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def test_high_predicted
     er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
+    pred = create_predictor(er)
+    assert_equal true, pred.high_predicted?
+  end
+
+  def test_high_predicted_when_urgent_later
+    ranges = %i[normal high urgent_high]
+    durations_seconds = [HIGH_NOTICE, HIGH_DURATION, HIGH_DURATION]
+    er = create_er_seconds(ranges, durations_seconds)
     pred = create_predictor(er)
     assert_equal true, pred.high_predicted?
   end

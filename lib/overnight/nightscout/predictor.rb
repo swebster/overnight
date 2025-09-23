@@ -57,29 +57,41 @@ module Overnight
         entry_ranges.sum(&:duration) > max_duration
       end
 
-      def problematic?(entry_ranges, notice_period, max_duration)
-        in_range_soon?(entry_ranges, notice_period) &&
-          exceeds_duration?(entry_ranges, max_duration)
+      def contains_urgent?(entry_ranges, urgent_range)
+        entry_ranges.any? { it.range == urgent_range }
+      end
+
+      def problematic?(entry_ranges, notice_period, max_duration, urgent_range)
+        in_range_soon?(entry_ranges, notice_period) && (
+          exceeds_duration?(entry_ranges, max_duration) ||
+          contains_urgent?(entry_ranges, urgent_range)
+        )
       end
 
       def predicted_low
         er = find_predicted(%i[low urgent_low])
-        problematic?(er, LOW_NOTICE, LOW_DURATION) ? er : EMPTY_ARRAY
+        problematic?(er, LOW_NOTICE, LOW_DURATION, :urgent_low) ? er : EMPTY_ARRAY
       end
 
       def predicted_high
         er = find_predicted(%i[high urgent_high])
-        problematic?(er, HIGH_NOTICE, HIGH_DURATION) ? er : EMPTY_ARRAY
+        problematic?(er, HIGH_NOTICE, HIGH_DURATION, :urgent_high) ? er : EMPTY_ARRAY
       end
 
       def handle_low(type)
         er = predicted_low
-        Problem.new(er, :low, type) unless er.empty? || low_treated?
+        return nil if er.empty?
+
+        # any urgent lows or untreated regular lows are problematic
+        Problem.new(er, :low, type) if contains_urgent?(er, :urgent_low) || !low_treated?
       end
 
       def handle_high(type)
         er = predicted_high
-        Problem.new(er, :high, type) unless er.empty? || high_treated?
+        return nil if er.empty?
+
+        # any urgent highs or untreated regular highs are problematic
+        Problem.new(er, :high, type) if contains_urgent?(er, :urgent_high) || !high_treated?
       end
 
       def low_treated?
