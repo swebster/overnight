@@ -7,6 +7,7 @@ Constants  = Overnight::Nightscout::Constants
 Entry      = Overnight::Nightscout::Entry
 EntryRange = Overnight::Nightscout::EntryRange
 Predictor  = Overnight::Nightscout::Predictor
+Treatment  = Overnight::Nightscout::Treatment
 
 class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   LOW_NOTICE    = Predictor::LOW_NOTICE
@@ -110,6 +111,29 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 1, pred.problem.priority(overnight: false)
   end
 
+  def test_problem_when_predicted_low_and_not_eaten_recently
+    er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
+    time_eaten = Time.now - Predictor::LOW_TREATMENT_WINDOW
+    pred = create_predictor(er, treatments: [enter_carbs(time_eaten)])
+    refute_nil pred.problem
+  end
+
+  def test_no_problem_when_predicted_low_but_eaten_recently
+    er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
+    time_eaten = Time.now - Predictor::LOW_TREATMENT_WINDOW + 1
+    pred = create_predictor(er, treatments: [enter_carbs(time_eaten)])
+    assert_nil pred.problem
+  end
+
+  def test_problem_when_urgent_low_later_despite_eating_recently
+    ranges = %i[normal low urgent_low]
+    durations_seconds = [LOW_NOTICE, LOW_DURATION, LOW_DURATION]
+    er = create_er_seconds(ranges, durations_seconds)
+    time_eaten = Time.now - Predictor::LOW_TREATMENT_WINDOW + 1
+    pred = create_predictor(er, treatments: [enter_carbs(time_eaten)])
+    refute_nil pred.problem
+  end
+
   def test_no_problem_when_normal
     er = create_er_minutes([:normal], [120])
     pred = create_predictor(er)
@@ -145,7 +169,11 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     [min, max]
   end
 
-  def create_predictor(entry_ranges)
-    Predictor.new(entry_ranges, [])
+  def enter_carbs(timestamp)
+    Treatment::CarbCorrection.new(timestamp:, absorptionTime: 180, carbs: 30)
+  end
+
+  def create_predictor(entry_ranges, treatments: [])
+    Predictor.new(entry_ranges, treatments)
   end
 end

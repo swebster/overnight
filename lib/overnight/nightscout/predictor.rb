@@ -16,6 +16,8 @@ module Overnight
       LOW_DURATION = 15 * 60
       # max acceptable length of predicted highs
       HIGH_DURATION = 60 * 60
+      # max age of carb corrections to consider as low treatments
+      LOW_TREATMENT_WINDOW = 15 * 60
 
       def initialize(entry_ranges, treatments)
         raise Error, 'No glucose entries provided' if entry_ranges.empty?
@@ -95,7 +97,10 @@ module Overnight
       end
 
       def low_treated?
-        false
+        recent_cutoff = Time.now - LOW_TREATMENT_WINDOW
+        @treatments.any? do
+          it.is_a?(Treatment::CarbCorrection) && it.timestamp > recent_cutoff
+        end
       end
 
       def high_treated?
