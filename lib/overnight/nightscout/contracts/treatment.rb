@@ -30,6 +30,7 @@ module Overnight
         json(TimedEventSchema) do
           required(:correctionRange).value(:array, size?: 2).each { float? & gteq?(0) }
           required(:insulinNeedsScaleFactor).filled { float? & gteq?(0) }
+          required(:duration).filled { (int? | float?) & gteq?(0) }
           required(:reason).filled(:string)
         end
       end

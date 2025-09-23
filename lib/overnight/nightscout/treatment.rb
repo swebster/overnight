@@ -8,8 +8,17 @@ module Overnight
     # anything that is likely to affect blood glucose, e.g. insulin, food, etc.
     module Treatment
       TemporaryOverride = Data.define(
-        :timestamp, :correctionRange, :insulinNeedsScaleFactor, :reason
-      )
+        :timestamp, :correctionRange, :insulinNeedsScaleFactor, :duration, :reason
+      ) do
+        def name
+          # remove any leading emoji or whitespace
+          reason.sub(/^\W+/, '')
+        end
+
+        def expiry
+          timestamp + (duration * 60).round
+        end
+      end
 
       TempBasal = Data.define(:timestamp, :rate)
 
