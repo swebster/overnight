@@ -7,9 +7,9 @@ module Overnight
     # standardises formatting when printing various properties to $stdout
     module Printer
       RANGE_COLOURS = Hash.new { ->(s) { s } }.update({
-         urgent_low: ->(s) { Rainbow(s).bg(:red) },
-                low: ->(s) { Rainbow(s).red },
-               high: ->(s) { Rainbow(s).yellow },
+        urgent_low:  ->(s) { Rainbow(s).bg(:red) },
+        low:         ->(s) { Rainbow(s).red },
+        high:        ->(s) { Rainbow(s).yellow },
         urgent_high: ->(s) { Rainbow(s).black.bg(:yellow) }
       }).freeze
 

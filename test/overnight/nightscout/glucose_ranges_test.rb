@@ -10,10 +10,10 @@ class TestGlucoseRanges < Minitest::Test
   LOWER_BOUND_URGENT_HIGH = 247
 
   GLUCOSE_RANGES = Overnight::Nightscout::Status::GlucoseRanges.new({
-             bgLow: UPPER_BOUND_URGENT_LOW,
+    bgLow:          UPPER_BOUND_URGENT_LOW,
     bgTargetBottom: UPPER_BOUND_LOW,
-       bgTargetTop: LOWER_BOUND_HIGH,
-            bgHigh: LOWER_BOUND_URGENT_HIGH
+    bgTargetTop:    LOWER_BOUND_HIGH,
+    bgHigh:         LOWER_BOUND_URGENT_HIGH
   }).freeze
 
   def find(glucose)

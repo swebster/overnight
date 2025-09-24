@@ -5,7 +5,7 @@ Style/FormatStringToken:
 
 # it is much easier to parse a hash when all its elements are aligned
 Layout/HashAlignment:
-  EnforcedColonStyle: separator
+  EnforcedColonStyle: table
 
 Layout/FirstHashElementIndentation:
   EnforcedStyle: consistent
