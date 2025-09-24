@@ -14,6 +14,7 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
   HIGH_NOTICE   = Predictor::HIGH_NOTICE
   LOW_DURATION  = Predictor::LOW_DURATION
   HIGH_DURATION = Predictor::HIGH_DURATION
+  HIGH_OVERRIDE = Predictor::HIGH_OVERRIDE_NAME
 
   RANGE_GLUCOSE = {
     urgent_low:  54,
@@ -147,6 +148,18 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 0, pred.problem.priority(overnight: false)
   end
 
+  def test_no_problem_when_predicted_high_but_override_active
+    er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
+    pred = create_predictor(er, treatments: [create_override(60, 61)])
+    assert_nil pred.problem
+  end
+
+  def test_problem_when_predicted_high_and_override_expired
+    er = create_er_seconds(%i[normal high], [HIGH_NOTICE, HIGH_DURATION + 1])
+    pred = create_predictor(er, treatments: [create_override(61, 60)])
+    refute_nil pred.problem
+  end
+
   private
 
   def create_er_seconds(ranges, durations_seconds)
@@ -171,6 +184,16 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
 
   def enter_carbs(timestamp)
     Treatment::CarbCorrection.new(timestamp:, absorptionTime: 180, carbs: 30)
+  end
+
+  def create_override(minutes_ago, minutes_active)
+    Treatment::TemporaryOverride.new(
+      timestamp:               Time.now - minutes_ago * 60,
+      correctionRange:         [6.6 * 18, 7.0 * 18],
+      insulinNeedsScaleFactor: 0.9,
+      duration:                minutes_active,
+      reason:                  "🏃‍♂️ #{HIGH_OVERRIDE}"
+    )
   end
 
   def create_predictor(entry_ranges, treatments: [])

@@ -18,6 +18,8 @@ module Overnight
       HIGH_DURATION = 60 * 60
       # max age of carb corrections to consider as low treatments
       LOW_TREATMENT_WINDOW = 15 * 60
+      # name of the override preset to consider as high treatment
+      HIGH_OVERRIDE_NAME = 'Exercise'
 
       def initialize(entry_ranges, treatments)
         raise Error, 'No glucose entries provided' if entry_ranges.empty?
@@ -97,14 +99,19 @@ module Overnight
       end
 
       def low_treated?
-        recent_cutoff = Time.now - LOW_TREATMENT_WINDOW
-        @treatments.any? do
-          it.is_a?(Treatment::CarbCorrection) && it.timestamp > recent_cutoff
+        any_treatment?(Treatment::CarbCorrection) do
+          it.timestamp > Time.now - LOW_TREATMENT_WINDOW
         end
       end
 
       def high_treated?
-        false
+        any_treatment?(Treatment::TemporaryOverride) do
+          it.name == HIGH_OVERRIDE_NAME && it.expiry > Time.now
+        end
+      end
+
+      def any_treatment?(klass, &)
+        @treatments.lazy.select { it.is_a?(klass) }.any?(&)
       end
     end
   end
