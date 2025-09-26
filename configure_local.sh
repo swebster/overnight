@@ -17,6 +17,15 @@ function config_nightscout_port() {
   echo "NIGHTSCOUT_PORT=${nightscout_port}"
 }
 
+function config_overnight_override() {
+  cat <<- EOF
+		If you have configured a custom override in Loop for exercise, overnight can
+		suppress notifications about high blood glucose when that override is active.
+	EOF
+  read -rp "Enter the name of your override to enable this behaviour: " high_override
+  echo "OVERNIGHT_HIGH_OVERRIDE=${high_override}"
+}
+
 function config_overnight_begin() {
   local -r default_begin=23
   read -rp "Start priority monitoring at hour [${default_begin}]: " overnight_begin
@@ -40,6 +49,7 @@ function config_timezone() {
 
 config_nightscout_host
 config_nightscout_port
+config_overnight_override
 config_overnight_begin
 config_overnight_end
 config_timezone
@@ -47,10 +57,14 @@ config_timezone
 printf '%s=%s\n' \
   NIGHTSCOUT_HOST "${nightscout_host}" \
   NIGHTSCOUT_PORT "${nightscout_port}" \
+  OVERNIGHT_HIGH_OVERRIDE "${high_override}" \
   OVERNIGHT_PERIOD_BEGIN "${overnight_begin}" \
   OVERNIGHT_PERIOD_END "${overnight_end}" \
   TZ "${timezone}" \
   > "${TMP_LOCAL}"
 
-# exclude the default port from the configuration file
-grep -xv "NIGHTSCOUT_PORT=${DEFAULT_PORT}" "${TMP_LOCAL}" > "${ENV_LOCAL}"
+# exclude the default port and any empty override from the configuration file
+grep -xv \
+  -e "NIGHTSCOUT_PORT=${DEFAULT_PORT}" \
+  -e "OVERNIGHT_HIGH_OVERRIDE=" \
+  "${TMP_LOCAL}" > "${ENV_LOCAL}"
