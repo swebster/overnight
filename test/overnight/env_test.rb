@@ -8,8 +8,9 @@ require 'tempfile'
 Env   = Overnight::Env
 Error = Overnight::Error
 
-class TestEnv < Minitest::Test
+class TestEnv < Minitest::Test # rubocop:disable Metrics/ClassLength
   REQUIRED_KEY         = 'REQUIRED_KEY'
+  OPTIONAL_KEY         = 'OPTIONAL_KEY'
   REQUIRED_SECRET      = 'REQUIRED_SECRET'
   REQUIRED_SECRET_FILE = "#{REQUIRED_SECRET}_FILE".freeze
 
@@ -107,5 +108,34 @@ class TestEnv < Minitest::Test
       assert_match(/\bNot a valid hour\b/, error.message)
       assert_match(/\b#{REQUIRED_KEY}\b/, error.message)
     end
+  end
+
+  def test_fetch_string
+    some_value = 'some value'
+    ClimateControl.modify({ REQUIRED_KEY => some_value }) do
+      value = Env.fetch_string(REQUIRED_KEY) # should not raise Overnight::Error
+      assert_equal some_value, value
+    end
+  end
+
+  def test_fetch_invalid_string
+    ClimateControl.modify({ REQUIRED_KEY => '🏃‍♂️ some value' }) do
+      error = assert_raises(Error) { Env.fetch_string(REQUIRED_KEY) }
+      assert_match(/\bNot a valid string\b/, error.message)
+      assert_match(/\b#{REQUIRED_KEY}\b/, error.message)
+    end
+  end
+
+  def test_fetch_empty_string
+    ClimateControl.modify({ REQUIRED_KEY => '' }) do
+      error = assert_raises(Error) { Env.fetch_string(REQUIRED_KEY) }
+      assert_match(/\bNot a valid string\b/, error.message)
+      assert_match(/\b#{REQUIRED_KEY}\b/, error.message)
+    end
+  end
+
+  def test_fetch_undefined_string
+    value = Env.fetch_string(OPTIONAL_KEY) # should not raise Overnight::Error
+    assert_nil value
   end
 end

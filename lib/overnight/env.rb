@@ -24,12 +24,20 @@ module Overnight
       end
     end
 
+    def self.fetch_string(key)
+      ENV[key].tap { validate_string(key, it) unless it.nil? }
+    end
+
     def self.fetch_unsigned(key)
       ENV[key].tap { validate_unsigned(key, it) }.to_i
     end
 
     def self.fetch_hour(key)
       fetch_unsigned(key).tap { validate_hour(key, it) }
+    end
+
+    def self.validate_string(key, value)
+      raise Error, "Not a valid string: #{key}" unless /^\w+(?: {1}\w+)*$/.match?(value)
     end
 
     def self.validate_unsigned(key, value)
