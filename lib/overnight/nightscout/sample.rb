@@ -43,7 +43,11 @@ module Overnight
       end
 
       def problem
-        Predictor.new(entry_ranges, @treatments).problem
+        Predictor.new(
+          entry_ranges:  entry_ranges,
+          treatments:    @treatments,
+          high_override: HIGH_OVERRIDE
+        ).problem
       end
 
       # number of seconds since Nightscout last received data from Loop

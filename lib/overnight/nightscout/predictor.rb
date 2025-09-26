@@ -18,14 +18,20 @@ module Overnight
       HIGH_DURATION = 60 * 60
       # max age of carb corrections to consider as low treatments
       LOW_TREATMENT_WINDOW = 15 * 60
-      # name of the override preset to consider as high treatment
-      HIGH_OVERRIDE_NAME = 'Exercise'
 
-      def initialize(entry_ranges, treatments)
-        raise Error, 'No glucose entries provided' if entry_ranges.empty?
+      def initialize(entry_ranges:, treatments:, high_override:)
+        raise Error, 'No glucose entries provided'  unless entry_ranges&.any?
+        raise Error, 'Invalid treatment collection' if treatments.nil?
+        raise Error, 'Invalid high override name'   if high_override&.empty?
 
+        # not nil, not empty
         @entry_ranges = entry_ranges
+
+        # not nil, may be empty
         @treatments = treatments
+
+        # may be nil, but not empty
+        @high_override = high_override
       end
 
       def low_predicted?
@@ -105,8 +111,10 @@ module Overnight
       end
 
       def high_treated?
+        return false if @high_override.nil?
+
         any_treatment?(Treatment::TemporaryOverride) do
-          it.name == HIGH_OVERRIDE_NAME && it.expiry > Time.now
+          it.name == @high_override && it.expiry > Time.now
         end
       end
 
