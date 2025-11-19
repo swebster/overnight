@@ -9,6 +9,9 @@ module Overnight
       VALID_CATEGORIES = %i[low high].freeze
       VALID_TYPES      = %i[predicted persistent urgent].freeze
 
+      # the period within which predicted urgent lows are considered an emergency
+      URGENT_LOW_NOTICE = 30 * 60
+
       attr_reader :category, :type
 
       def initialize(entry_ranges, category, type)
@@ -21,7 +24,7 @@ module Overnight
       end
 
       def priority(overnight:)
-        return 2 if overnight
+        return 2 if overnight || urgent_low_soon?
 
         (@type == :urgent ? 1 : 0) + (@category == :low ? 1 : 0)
       end
@@ -34,6 +37,12 @@ module Overnight
       end
 
       private
+
+      def urgent_low_soon?
+        @category == :low && @entry_ranges.any? do
+          it.range == :urgent_low && it.time <= Time.now + URGENT_LOW_NOTICE
+        end
+      end
 
       def format_time(entry)
         if @type == :predicted

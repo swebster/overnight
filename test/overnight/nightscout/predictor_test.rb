@@ -112,6 +112,13 @@ class TestPredictor < Minitest::Test # rubocop:disable Metrics/ClassLength
     assert_equal 1, pred.problem.priority(overnight: false)
   end
 
+  def test_problem_when_predicted_urgent_low_soon
+    er = create_er_minutes(%i[normal low urgent_low], [10, 10, 100])
+    pred = create_predictor(er)
+    refute_nil pred.problem
+    assert_equal 2, pred.problem.priority(overnight: false)
+  end
+
   def test_problem_when_predicted_low_and_not_eaten_recently
     er = create_er_seconds(%i[normal low], [LOW_NOTICE, LOW_DURATION + 1])
     time_eaten = Time.now - Predictor::LOW_TREATMENT_WINDOW
