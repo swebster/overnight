@@ -2,7 +2,7 @@ version: '3'
 
 vars:
   OVERNIGHT: swebster/overnight
-  PODLET: ghcr.io/containers/podlet:v0.3.0
+  PODLET: ghcr.io/containers/podlet:v0.3.2
   IMAGE_FORMAT: '{{`{{.Repository}}:{{.Tag}}`}}'
   IMAGE_OPTIONS: --filter dangling=false --format {{.IMAGE_FORMAT}}
   PODMAN_OPTIONS_FILE: .task/podman_run.options
