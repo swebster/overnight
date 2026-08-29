@@ -12,18 +12,18 @@ Gem::Specification.new do |s|
   s.homepage = 'https://github.com/swebster/overnight'
   s.license = 'MIT'
 
-  s.required_ruby_version = '>= 3.4.0'
+  s.required_ruby_version = '>= 4.0.0'
 
-  s.add_dependency 'dotenv', '~> 3.1'
+  s.add_dependency 'dotenv', '~> 3.2'
   s.add_dependency 'dry-validation', '~> 1.11'
-  s.add_dependency 'json', '~> 2.14'
-  s.add_dependency 'jwt', '~> 3.1'
+  s.add_dependency 'json', '~> 2.21'
+  s.add_dependency 'jwt', '~> 3.2'
   s.add_dependency 'rainbow', '~> 3.1'
   s.add_dependency 'rufus-scheduler', '~> 3.9'
-  s.add_dependency 'typhoeus', '~> 1.4'
+  s.add_dependency 'typhoeus', '~> 1.6'
 
   s.add_development_dependency 'climate_control', '~> 1.2'
-  s.add_development_dependency 'minitest', '~> 5.25'
-  s.add_development_dependency 'rubocop', '~> 1.80'
+  s.add_development_dependency 'minitest', '~> 6.0'
+  s.add_development_dependency 'rubocop', '~> 1.90'
   s.add_development_dependency 'ruby-lsp', '~> 0.26'
 end
