@@ -46,7 +46,7 @@ module Overnight
       end
 
       def format_cob(cob)
-        format('%4.1f', cob)
+        format('%5.1f', cob)
       end
     end
   end
